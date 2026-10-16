@@ -1,0 +1,2970 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Servicerapport</title>
+  <style>
+*{box-sizing:border-box}
+:root{
+  --paper:#eceee7;--surface:#fff;--text:#1a221c;--muted:#5e6b61;--border:#c9d0c3;--border-strong:#1a221c;
+  --ink:#16201a;--accent:#0f6b52;--accent-dark:#0a4f3c;--accent-soft:#e2eee6;--danger:#9a3324;
+  --danger-bg:#f8ece9;--success:#2c6b3f;--success-bg:#eaf2ec;--warning:#8a5a00;--warning-bg:#f7eed9;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+  --r:6px;--r-lg:8px
+}
+body{
+  margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--paper);color:var(--text)
+}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}
+
+/* -- Login: a signed work order, not a floating SaaS card -- */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.login-card{
+  width:min(100%,440px);background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--ink);
+  padding:30px 28px 26px
+}
+.login-card h1{margin:10px 0 10px;letter-spacing:-.01em}
+.login-copy{color:var(--muted);line-height:1.5;margin-bottom:26px}
+.login-card input{
+  width:100%;min-height:48px;border:1px solid var(--border);border-radius:var(--r);padding:0 13px;
+  margin-bottom:12px;outline:none;background:var(--surface)
+}
+.login-card input:focus{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.login-note{font-size:.78rem;color:var(--muted);line-height:1.45;margin:14px 0 0;padding-top:14px;border-top:1px solid var(--border)}
+
+.app-shell{width:min(100%,720px);margin:0 auto;padding:22px 16px 40px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px 22px;border-bottom:1px solid var(--border);margin-bottom:22px}
+.brand-area{display:flex;align-items:center;gap:12px}
+.brand-mark{
+  width:44px;height:44px;border-radius:var(--r);background:var(--ink);color:#fff;display:grid;place-items:center;
+  font-weight:700;letter-spacing:.03em;font-family:var(--mono);font-size:.92rem
+}
+.brand-mark.large{width:52px;height:52px}
+.icon-button{width:42px;height:42px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);font-size:1.1rem}
+.eyebrow,.step{
+  margin:0 0 4px;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:700;
+  color:var(--accent);font-family:var(--mono)
+}
+h1{font-size:1.4rem;margin:0;letter-spacing:-.01em}h2{font-size:1.1rem;margin:0;letter-spacing:-.005em}
+
+/* -- Panels: flat bordered sheets, accent only on the active one -- */
+.card,.welcome-card{
+  background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--ink);
+  padding:20px;margin-bottom:14px
+}
+.welcome-card{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;background:var(--ink);color:#fff;border-top-color:var(--accent)}
+.welcome-card p:not(.step){margin:8px 0 0;line-height:1.5;color:#d6e2da;font-size:.9rem}
+.today-badge{white-space:nowrap;background:rgba(255,255,255,.14);padding:7px 10px;border-radius:var(--r);font-size:.75rem;font-weight:700;font-family:var(--mono)}
+.section-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.badge{font-size:.72rem;font-weight:700;background:var(--accent-soft);color:var(--accent-dark);padding:5px 9px;border-radius:var(--r);white-space:nowrap;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.badge.warning{background:var(--warning-bg);color:var(--warning)}
+.prompt-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.prompt-item{
+  width:100%;display:flex;align-items:flex-start;gap:12px;text-align:left;border:1px solid var(--border);
+  border-radius:var(--r);background:var(--surface);padding:12px;color:var(--text)
+}
+.prompt-item:hover{border-color:var(--ink)}
+.prompt-item>span{
+  width:28px;height:28px;flex:0 0 28px;border-radius:var(--r);background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-size:.8rem;font-weight:700;font-family:var(--mono)
+}
+.prompt-item strong{display:block;font-size:.88rem}.prompt-item small{display:block;color:var(--muted);margin-top:3px;line-height:1.35}
+.example-box{margin-top:14px;background:var(--paper);border-radius:var(--r);padding:13px}
+.example-box strong{font-size:.85rem}.example-box p{font-size:.83rem;line-height:1.5;color:var(--text);margin:7px 0}
+.text-button{border:0;background:transparent;padding:0;color:var(--accent);font-weight:700;font-size:.83rem;text-decoration:underline;text-underline-offset:3px}
+.active-question{display:flex;gap:10px;align-items:center;background:var(--accent-soft);border:1px solid #bcd9c8;border-radius:var(--r);padding:10px 12px;margin-bottom:12px}
+.active-question span{font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--accent);font-family:var(--mono)}
+.active-question p{margin:0;font-size:.84rem;color:var(--accent-dark)}
+
+/* -- Mic buttons: deliberate, squared-off, the one bold moment on each step -- */
+.mic-button{
+  width:100%;min-height:72px;border:0;border-radius:var(--r);background:var(--ink);color:#fff;font-size:1.02rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s background
+}
+.mic-button:hover{background:#273a2f}.mic-button:active{transform:translateY(1px)}.mic-button.recording{background:var(--danger)}
+.mic-icon{font-size:1.5rem}
+.recording-indicator{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--danger);font-weight:600;font-size:.88rem}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--danger);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35;transform:scale(1.35)}}
+label{display:block;font-weight:700;font-size:.89rem;margin:17px 0 7px}
+textarea{
+  width:100%;resize:vertical;min-height:108px;border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;
+  background:var(--surface);color:var(--text);line-height:1.48;outline:none
+}
+textarea:focus{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.hint{margin:8px 2px 0;color:var(--muted);font-size:.8rem;line-height:1.45}
+
+/* -- Buttons: filled ink/accent for primary, outlined for secondary -- no pill shapes -- */
+.primary-button,.secondary-button,.ghost-button{min-height:48px;border-radius:var(--r);font-weight:700;padding:0 16px}
+.primary-button{width:100%;border:1px solid var(--accent);background:var(--accent);color:#fff}
+.primary-button:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+.primary-button:disabled{opacity:.55;cursor:not-allowed}
+.secondary-button{border:1px solid var(--ink);background:transparent;color:var(--ink)}
+.secondary-button:hover{background:var(--ink);color:#fff}
+.secondary-button.full{width:100%;margin-top:10px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.ghost-button{grid-column:1/-1;border:0;background:transparent;color:var(--muted)}
+.ghost-button:hover{color:var(--ink)}
+.error-box,.success-box{border-radius:var(--r);padding:12px 13px;margin-top:12px;font-size:.88rem;font-weight:600;line-height:1.4;border-left:3px solid}
+.error-box{color:var(--danger);background:var(--danger-bg);border-color:var(--danger)}
+.success-box{color:var(--success);background:var(--success-bg);border-color:var(--success)}
+.review-check{display:flex;align-items:flex-start;gap:10px;margin-top:16px;background:var(--warning-bg);border:1px solid #e6cf8f;border-radius:var(--r);padding:12px}
+.review-check input{margin-top:3px}.review-check label{margin:0;font-size:.84rem;line-height:1.4}
+footer{
+  display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;text-align:center;
+  color:var(--muted);font-size:.76rem;padding:18px 12px 0;margin-top:8px;border-top:1px solid var(--border)
+}
+footer strong{font-family:var(--mono);letter-spacing:.02em;color:var(--text);font-weight:700}
+footer span{border-left:1px solid var(--border);padding-left:10px}
+@media(min-width:600px){
+  .app-shell{padding-top:30px}.card,.welcome-card{padding:24px}
+  .prompt-grid{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr 1fr 1fr}
+  .ghost-button{grid-column:auto;border:1px solid transparent}
+}
+
+
+.logout-button{
+  min-height:42px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);
+  padding:0 13px;font-weight:700;display:flex;align-items:center;gap:7px
+}
+.logout-button:hover{border-color:var(--ink)}
+.logout-button span{font-size:1.05rem}
+@media(max-width:480px){
+  .logout-button{width:42px;padding:0;justify-content:center}
+  .logout-button #logoutButtonLabel{display:none}
+  .logout-button span:first-child{font-size:1.1rem}
+}
+
+
+.raw-text-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.small-button{min-height:42px;padding:0 13px;font-size:.84rem}
+
+
+.pdf-button{width:auto}
+@media(min-width:600px){
+  .actions{grid-template-columns:1fr 1fr 1fr}
+  .pdf-button{grid-column:1/-1}
+  .ghost-button{grid-column:1/-1}
+}
+
+
+.report-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.meta-display{
+  width:100%;min-height:46px;border:1px solid var(--border);border-radius:var(--r);padding:0 12px;
+  background:var(--paper);color:var(--text);display:flex;align-items:center;font-weight:700;font-family:var(--mono)
+}
+.report-meta input{
+  width:100%;min-height:46px;border:1px solid var(--border);border-radius:var(--r);font-family:var(--mono);
+  padding:0 12px;background:var(--surface);color:var(--text);outline:none
+}
+.report-meta input:focus{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+@media(max-width:520px){.report-meta{grid-template-columns:1fr}}
+
+
+.model-status{
+  border:1px solid var(--border);border-left:3px solid var(--border);
+  background:var(--surface);
+  padding:12px 13px;
+  margin-bottom:12px;
+}
+.model-status-row{display:flex;align-items:center;gap:8px;font-size:.84rem}
+.model-status-dot{width:8px;height:8px;border-radius:50%;background:#9aa39c;flex:0 0 8px}
+.model-status-dot.loading{background:#b4791a;animation:pulse 1s infinite}
+.model-status-dot.ready{background:var(--success)}
+.model-status-dot.error{background:var(--danger)}
+.model-progress-track{
+  height:5px;border-radius:0;background:var(--paper);overflow:hidden;margin-top:9px
+}
+.model-progress-bar{
+  height:100%;width:0%;background:var(--accent);transition:width .2s ease
+}
+.model-status p{margin:8px 0 0;color:var(--muted);font-size:.76rem;line-height:1.4}
+
+.login-model-status{margin-top:18px;margin-bottom:0}
+
+.clarify-box{border-radius:var(--r);padding:13px 14px;margin-top:12px;background:var(--warning-bg);border:1px solid #e6cf8f;color:#6b4500}
+.clarify-box strong{display:block;margin-bottom:7px;font-size:.88rem}
+.clarify-box ul{margin:0 0 12px;padding-left:18px;font-size:.85rem;line-height:1.55}
+.clarify-actions{display:flex;gap:10px;flex-wrap:wrap}
+.clarify-actions .small-button{min-height:40px;padding:0 12px;font-size:.82rem}
+
+.lang-switch{display:flex;gap:0;justify-content:flex-end;margin-bottom:18px;border:1px solid var(--border);width:fit-content;margin-left:auto}
+.lang-pill{
+  border:0;background:var(--surface);color:var(--muted);font-weight:600;
+  font-size:.78rem;padding:7px 13px;min-height:0;border-radius:0
+}
+.lang-pill+.lang-pill{border-left:1px solid var(--border)}
+.lang-pill.active{background:var(--ink);color:#fff}
+
+/* -- Wizard: a numbered step track instead of a smooth progress bar -- */
+.wizard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 2px;margin-bottom:12px}
+.wizard-head h2{margin-top:2px}
+.wizard-meta{white-space:nowrap;color:var(--muted);font-size:.82rem;font-weight:600;margin-top:5px;font-family:var(--mono);display:flex;align-items:center;gap:8px}
+.wizard-meta-ai{display:inline-flex;align-items:center;gap:5px;padding-left:8px;border-left:1px solid var(--border);cursor:default}
+.wizard-meta span:first-child{color:var(--text)}
+.wizard-meta span+span{border-left:1px solid var(--border);padding-left:8px}
+.wizard-progress-track{
+  height:4px;background:var(--border);margin:0 2px 20px;
+  background-image:repeating-linear-gradient(90deg,var(--paper) 0,var(--paper) 2px,transparent 2px,transparent calc(100%/6));
+  background-size:calc(100% + 2px) 100%
+}
+.wizard-progress-bar{height:100%;width:16.6%;background:var(--accent);transition:width .25s ease}
+.panel-subtitle{color:var(--muted);margin:8px 0 16px;line-height:1.5;font-size:.92rem}
+.mic-row{display:flex;gap:10px;margin-top:14px}
+.mic-button-inline{
+  flex:1;min-height:50px;border:0;border-radius:var(--r);background:var(--ink);color:#fff;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s background
+}
+.mic-button-inline:hover{background:#273a2f}
+.mic-button-inline.recording{background:var(--danger)}
+.mic-button-inline:disabled{opacity:.5;cursor:not-allowed}
+.mic-row .secondary-button{flex:0 0 auto}
+.step-nav{display:flex;gap:10px;margin-top:20px}
+.step-nav .primary-button{flex:1}
+.step-nav .secondary-button{flex:0 0 auto;min-width:110px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.summary-card{
+  text-align:left;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);padding:14px;
+  display:flex;flex-direction:column;gap:6px;color:var(--text);min-height:0
+}
+.summary-card:hover{border-color:var(--ink)}
+.summary-card .num{
+  width:22px;height:22px;border-radius:var(--r);background:var(--accent-soft);color:var(--accent-dark);font-weight:700;font-size:.78rem;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono)
+}
+.summary-card strong{font-size:.92rem}
+.summary-card small{
+  color:var(--muted);font-size:.8rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden
+}
+.example-link{border:0;background:transparent;padding:0;color:var(--accent);font-weight:700;font-size:.83rem;margin-top:14px;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:480px){.summary-grid{grid-template-columns:1fr}}
+
+/* -- Wide screens: use the available width instead of a narrow centered column,
+      so a full report fits with far less scrolling. -- */
+@media(min-width:860px){
+  .app-shell{width:min(100%,1040px)}
+  .summary-grid{grid-template-columns:repeat(4,1fr)}
+  .report-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:0 18px}
+  .report-fields .report-field label{margin-top:0}
+  .report-fields textarea{min-height:220px}
+  .report-meta{grid-template-columns:1fr 1fr;max-width:460px}
+  /* A single wizard field stays a comfortable reading/typing width even when
+     the page itself is wide; the report step above is the one that actually
+     benefits from the extra horizontal room. */
+  .wizard-panel .eyebrow,.wizard-panel h2,.wizard-panel .panel-subtitle,.wizard-panel textarea,
+  .wizard-panel .mic-row,.wizard-panel .recording-indicator,.wizard-panel .hint,
+  .wizard-panel .example-link,.wizard-panel .step-nav{max-width:680px;margin-left:auto;margin-right:auto}
+  .wizard-panel textarea,.wizard-panel .example-link{display:block}
+}
+@media(min-width:1180px){
+  .app-shell{width:min(100%,1280px)}
+}
+
+</style>
+</head>
+<body>
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="lang-switch" role="group" aria-label="Taal / Language">
+        <button id="langNlButton" class="lang-pill" type="button" data-lang="nl">Nederlands</button>
+        <button id="langEnButton" class="lang-pill" type="button" data-lang="en">English</button>
+      </div>
+
+      <div class="brand-mark large">SR</div>
+      <p class="eyebrow" id="loginEyebrow">Technische service</p>
+      <h1 id="loginTitle">Servicerapport</h1>
+      <p class="login-copy" id="loginCopy">Snel en duidelijk servicerapporten maken na iedere klus.</p>
+
+      <label for="emailInput" id="userLabel">Gebruiker</label>
+      <input id="emailInput" type="text" placeholder="Bijv. Lennart" autocomplete="username" />
+
+      <button id="loginButton" class="primary-button" type="button">Inloggen</button>
+
+      <p class="login-note" id="loginNote">Je rapporten worden gekoppeld aan de naam die je hier invult.</p>
+      <div id="loginError" class="error-box hidden"></div>
+
+      <div id="loginModelStatus" class="model-status login-model-status">
+        <div class="model-status-row">
+          <span id="loginModelStatusDot" class="model-status-dot"></span>
+          <strong id="loginModelStatusText">Rapportmotor voorbereiden…</strong>
+        </div>
+        <div class="model-progress-track">
+          <div id="loginModelProgressBar" class="model-progress-bar"></div>
+        </div>
+        <p id="loginModelStatusDetail">Dit gebeurt alvast op de achtergrond terwijl je inlogt, zodat je straks niet hoeft te wachten.</p>
+      </div>
+    </div>
+  </section>
+
+  <main id="app" class="app-shell hidden">
+    <header class="topbar">
+      <div class="brand-area">
+        <div class="brand-mark">SR</div>
+        <div>
+          <p class="eyebrow" id="appEyebrow">Technische service</p>
+          <h1 id="appTitle">Servicerapport</h1>
+        </div>
+      </div>
+      <button id="logoutButton" class="logout-button" type="button" title="Uitloggen"><span>↪</span> <span id="logoutButtonLabel">Uitloggen</span></button>
+    </header>
+
+    <div id="errorBox" class="error-box hidden" role="alert"></div>
+
+    <section class="wizard-head">
+      <div>
+        <p class="step" id="wizardStepLabel">STAP 1 VAN 6</p>
+        <h2 id="wizardStepTitle">Reden van de klus</h2>
+      </div>
+      <div class="wizard-meta">
+        <span id="wizardMetaName">Monteur</span><span id="wizardMetaDate"></span>
+        <span class="wizard-meta-ai" id="wizardMetaAi" title="">
+          <span id="wizardMetaAiDot" class="model-status-dot"></span>AI
+        </span>
+      </div>
+    </section>
+    <div class="wizard-progress-track"><div id="wizardProgressBar" class="wizard-progress-bar"></div></div>
+
+    <section id="wizardStep1" class="card wizard-panel" data-step="1">
+      <p class="eyebrow" id="ws1Eyebrow">1 · REDEN VAN DE KLUS</p>
+      <h2 id="ws1Title">Waarom ben je bij de klant?</h2>
+      <p class="panel-subtitle" id="ws1Subtitle">Vertel wat de klant meldde, wat de opdracht was of waarom de controle nodig was.</p>
+      <textarea id="inputReason" rows="7" placeholder="Bijv. De klant meldde een tikkend geluid vanuit de meterkast."></textarea>
+      <div class="mic-row">
+        <button class="mic-button-inline" data-field="reason" type="button" aria-pressed="false">
+          <span class="mic-icon">🎙️</span><span class="mic-btn-label">Inspreken</span>
+        </button>
+        <button class="secondary-button small-button" data-clear="reason" type="button">Wissen</button>
+      </div>
+      <div class="recording-indicator hidden" data-recording-for="reason">
+        <span class="pulse"></span><span id="recordingIndicatorText1">Luisteren… spreek rustig en duidelijk.</span>
+      </div>
+      <p class="hint" id="wizardMicHint1">Spreek rustig in korte zinnen. Technische woorden kun je daarna nog aanpassen.</p>
+      <button class="example-link" id="wizardUseExampleButton" type="button">Gebruik voorbeeldinvoer</button>
+      <div class="step-nav">
+        <button class="primary-button" data-next type="button">Volgende →</button>
+      </div>
+    </section>
+
+    <section id="wizardStep2" class="card wizard-panel hidden" data-step="2">
+      <p class="eyebrow" id="ws2Eyebrow">2 · WERKZAAMHEDEN</p>
+      <h2 id="ws2Title">Wat heb je gedaan?</h2>
+      <p class="panel-subtitle" id="ws2Subtitle">Beschrijf wat je hebt gecontroleerd, gemeten, vervangen of getest.</p>
+      <textarea id="inputWork" rows="7" placeholder="Bijv. Ik heb de hoofdschakelaar en groepen gecontroleerd en de temperatuur gemeten."></textarea>
+      <div class="mic-row">
+        <button class="mic-button-inline" data-field="work" type="button" aria-pressed="false">
+          <span class="mic-icon">🎙️</span><span class="mic-btn-label">Inspreken</span>
+        </button>
+        <button class="secondary-button small-button" data-clear="work" type="button">Wissen</button>
+      </div>
+      <div class="recording-indicator hidden" data-recording-for="work">
+        <span class="pulse"></span><span id="recordingIndicatorText2">Luisteren… spreek rustig en duidelijk.</span>
+      </div>
+      <p class="hint" id="wizardMicHint2">Spreek rustig in korte zinnen. Technische woorden kun je daarna nog aanpassen.</p>
+      <div class="step-nav">
+        <button class="secondary-button" data-prev type="button">← Vorige</button>
+        <button class="primary-button" data-next type="button">Volgende →</button>
+      </div>
+    </section>
+
+    <section id="wizardStep3" class="card wizard-panel hidden" data-step="3">
+      <p class="eyebrow" id="ws3Eyebrow">3 · BEVINDINGEN</p>
+      <h2 id="ws3Title">Wat heb je gevonden?</h2>
+      <p class="panel-subtitle" id="ws3Subtitle">Beschrijf wat je hebt vastgesteld. Benoem twijfel als je iets niet zeker weet.</p>
+      <textarea id="inputFindings" rows="7" placeholder="Bijv. Er zijn geen afwijkingen vastgesteld; de oorzaak is niet met zekerheid vast te stellen."></textarea>
+      <div class="mic-row">
+        <button class="mic-button-inline" data-field="findings" type="button" aria-pressed="false">
+          <span class="mic-icon">🎙️</span><span class="mic-btn-label">Inspreken</span>
+        </button>
+        <button class="secondary-button small-button" data-clear="findings" type="button">Wissen</button>
+      </div>
+      <div class="recording-indicator hidden" data-recording-for="findings">
+        <span class="pulse"></span><span id="recordingIndicatorText3">Luisteren… spreek rustig en duidelijk.</span>
+      </div>
+      <p class="hint" id="wizardMicHint3">Spreek rustig in korte zinnen. Technische woorden kun je daarna nog aanpassen.</p>
+      <div class="step-nav">
+        <button class="secondary-button" data-prev type="button">← Vorige</button>
+        <button class="primary-button" data-next type="button">Volgende →</button>
+      </div>
+    </section>
+
+    <section id="wizardStep4" class="card wizard-panel hidden" data-step="4">
+      <p class="eyebrow" id="ws4Eyebrow">4 · VERVOLG</p>
+      <h2 id="ws4Title">Wat moet er hierna gebeuren?</h2>
+      <p class="panel-subtitle" id="ws4Subtitle">Is extra controle, bestelling of een nieuwe afspraak nodig? (optioneel)</p>
+      <textarea id="inputNext" rows="7" placeholder="Bijv. Bij terugkeer van de klacht een gerichte vervolgcontrole uitvoeren."></textarea>
+      <div class="mic-row">
+        <button class="mic-button-inline" data-field="next" type="button" aria-pressed="false">
+          <span class="mic-icon">🎙️</span><span class="mic-btn-label">Inspreken</span>
+        </button>
+        <button class="secondary-button small-button" data-clear="next" type="button">Wissen</button>
+      </div>
+      <div class="recording-indicator hidden" data-recording-for="next">
+        <span class="pulse"></span><span id="recordingIndicatorText4">Luisteren… spreek rustig en duidelijk.</span>
+      </div>
+      <p class="hint" id="wizardMicHint4">Spreek rustig in korte zinnen. Technische woorden kun je daarna nog aanpassen.</p>
+      <div class="step-nav">
+        <button class="secondary-button" data-prev type="button">← Vorige</button>
+        <button class="primary-button" data-next type="button">Volgende →</button>
+      </div>
+    </section>
+
+    <section id="wizardStep5" class="card wizard-panel hidden" data-step="5">
+      <p class="eyebrow" id="ws5Eyebrow">5 · CONTROLE</p>
+      <h2 id="ws5Title">Klaar om het rapport te maken</h2>
+      <p class="panel-subtitle" id="ws5Subtitle">Controleer kort of alle vier onderdelen zijn ingevuld zoals jij ze bedoelt.</p>
+
+      <div class="summary-grid">
+        <button class="summary-card" data-goto="1" type="button"><span class="num">1</span><strong id="sum1Title">Reden</strong><small id="sum1Preview">Niet ingevuld</small></button>
+        <button class="summary-card" data-goto="2" type="button"><span class="num">2</span><strong id="sum2Title">Werkzaamheden</strong><small id="sum2Preview">Niet ingevuld</small></button>
+        <button class="summary-card" data-goto="3" type="button"><span class="num">3</span><strong id="sum3Title">Bevindingen</strong><small id="sum3Preview">Niet ingevuld</small></button>
+        <button class="summary-card" data-goto="4" type="button"><span class="num">4</span><strong id="sum4Title">Vervolg</strong><small id="sum4Preview">Niet ingevuld</small></button>
+      </div>
+
+      <div id="modelStatus" class="model-status">
+        <div class="model-status-row">
+          <span id="modelStatusDot" class="model-status-dot"></span>
+          <strong id="modelStatusText">AI wordt geladen bij eerste rapport</strong>
+        </div>
+        <div class="model-progress-track">
+          <div id="modelProgressBar" class="model-progress-bar"></div>
+        </div>
+        <p id="modelStatusDetail">De app opent direct. Pas bij "Genereer rapport" wordt het compacte model geladen.</p>
+      </div>
+
+      <button id="generateButton" class="primary-button" type="button">
+        <span id="generateLabel">✨ Maak professioneel rapport</span>
+      </button>
+
+      <button id="cancelGenerateButton" class="secondary-button full hidden" type="button">✕ Annuleren</button>
+
+      <button class="secondary-button full" data-prev type="button">← Vorige</button>
+    </section>
+
+    <section id="reportSection" class="card report-card hidden">
+      <div class="section-heading">
+        <h2 id="step3Title">Controleer het rapport</h2>
+        <span class="badge warning" id="step3Badge">Altijd controleren</span>
+      </div>
+      <div id="fallbackNotice" class="hint hidden">ℹ️ Dit rapport is samengesteld met de snelle ingebouwde rapportgenerator (het AI-taalmodel reageerde niet op tijd). Controleer de tekst dus extra goed.</div>
+      <div class="report-meta">
+        <div>
+          <label id="technicianLabel">Monteur</label>
+          <div id="technicianDisplay" class="meta-display">Monteur</div>
+        </div>
+        <div>
+          <label for="reportDate" id="reportDateLabel">Datum</label>
+          <input id="reportDate" type="date" />
+        </div>
+      </div>
+
+      <div class="report-fields">
+        <div class="report-field">
+          <label for="workDone" id="workDoneLabel">Uitgevoerde werkzaamheden</label>
+          <textarea id="workDone" rows="5"></textarea>
+        </div>
+        <div class="report-field">
+          <label for="findings" id="findingsLabel">Bevindingen</label>
+          <textarea id="findings" rows="5"></textarea>
+        </div>
+        <div class="report-field">
+          <label for="nextSteps" id="nextStepsLabel">Vervolgstappen</label>
+          <textarea id="nextSteps" rows="5"></textarea>
+        </div>
+      </div>
+
+      <div class="review-check">
+        <input id="reviewed" type="checkbox" />
+        <label for="reviewed" id="reviewedLabel">Ik heb het rapport gecontroleerd op technische fouten.</label>
+      </div>
+
+      <div class="actions">
+        <button id="editButton" class="secondary-button" type="button">✏️ Bewerken</button>
+        <button id="copyButton" class="secondary-button" type="button">📋 Kopiëren</button>
+        <button id="pdfButton" class="primary-button pdf-button" type="button">📄 Download als PDF</button>
+        <button id="newButton" class="ghost-button" type="button">↻ Nieuw rapport</button>
+      </div>
+
+      <div id="copyNotice" class="success-box hidden">Rapport gekopieerd.</div>
+    </section>
+
+    <footer>
+      <strong id="footerBrand">Servicerapport</strong>
+      <span id="footerTagline">Rapportage voor technische service & onderhoud</span>
+    </footer>
+  </main>
+
+  <script>
+const $ = id => document.getElementById(id);
+
+// ---------------------------------------------------------------------------
+// Taalkeuze (NL/EN). Geldt voor de hele app: interface, spraakherkenning,
+// AI-rapportgeneratie, de ingebouwde fallback-generator én de PDF.
+// ---------------------------------------------------------------------------
+const I18N = {
+  nl: {
+    loginEyebrow: "Technische service",
+    loginTitle: "Servicerapport",
+    loginCopy: "Snel en duidelijk servicerapporten maken na iedere klus.",
+    userLabel: "Gebruiker",
+    userPlaceholder: "Bijv. Lennart",
+    loginButton: "Inloggen",
+    loginNote: "Je rapporten worden gekoppeld aan de naam die je hier invult.",
+    loginFillFields: "Vul je naam in.",
+    loginModelStatusText: "Rapportmotor voorbereiden…",
+    loginModelStatusDetail: "Dit gebeurt alvast op de achtergrond terwijl je inlogt, zodat je straks niet hoeft te wachten.",
+
+    appEyebrow: "Technische service",
+    appTitle: "Servicerapport",
+    logoutButtonLabel: "Uitloggen",
+    welcomeStep: "Welkom",
+    welcomeText: "Maak direct na de klus een rapport, zodat belangrijke details niet verloren gaan.",
+    newReportBadge: "Nieuw rapport",
+    defaultTechnicianName: "Monteur",
+
+    wizardStepOf: "STAP {n} VAN 6",
+    wizardNext: "Volgende",
+    wizardPrev: "Vorige",
+    wizardFieldRequired: "Vul dit onderdeel in voordat je verdergaat.",
+    wizardUseExample: "Gebruik voorbeeldinvoer",
+    wizardMicHint: "Spreek rustig in korte zinnen. Technische woorden kun je daarna nog aanpassen.",
+    clearButtonShort: "Wissen",
+    summaryEmpty: "Niet ingevuld",
+
+    ws1Eyebrow: "1 · REDEN VAN DE KLUS",
+    ws1Title: "Waarom ben je bij de klant?",
+    ws1Subtitle: "Vertel wat de klant meldde, wat de opdracht was of waarom de controle nodig was.",
+    ws1Placeholder: "Bijv. De klant meldde een tikkend geluid vanuit de meterkast.",
+
+    ws2Eyebrow: "2 · WERKZAAMHEDEN",
+    ws2Title: "Wat heb je gedaan?",
+    ws2Subtitle: "Beschrijf wat je hebt gecontroleerd, gemeten, vervangen of getest.",
+    ws2Placeholder: "Bijv. Ik heb de hoofdschakelaar en groepen gecontroleerd en de temperatuur gemeten.",
+
+    ws3Eyebrow: "3 · BEVINDINGEN",
+    ws3Title: "Wat heb je gevonden?",
+    ws3Subtitle: "Beschrijf wat je hebt vastgesteld. Benoem twijfel als je iets niet zeker weet.",
+    ws3Placeholder: "Bijv. Er zijn geen afwijkingen vastgesteld; de oorzaak is niet met zekerheid vast te stellen.",
+
+    ws4Eyebrow: "4 · VERVOLG",
+    ws4Title: "Wat moet er hierna gebeuren?",
+    ws4Subtitle: "Is extra controle, bestelling of een nieuwe afspraak nodig? (optioneel)",
+    ws4Placeholder: "Bijv. Bij terugkeer van de klacht een gerichte vervolgcontrole uitvoeren.",
+
+    ws5Eyebrow: "5 · CONTROLE",
+    ws5Title: "Klaar om het rapport te maken",
+    ws5Subtitle: "Controleer kort of alle vier onderdelen zijn ingevuld zoals jij ze bedoelt.",
+
+    ws6Title: "Controleer het rapport",
+
+    sum1Title: "Reden",
+    sum2Title: "Werkzaamheden",
+    sum3Title: "Bevindingen",
+    sum4Title: "Vervolg",
+
+    exampleReason: "De pomp maakt veel lawaai.",
+    exampleWork: "Ik heb de pomp gecontroleerd en een los draadje opnieuw aangesloten.",
+    exampleFindings: "Het draadje zat los en de overige bedrading lijkt beschadigd.",
+    exampleNext: "Bij de volgende afspraak de bedrading opnieuw controleren.",
+
+    guidanceStep: "Wat moet je zeggen?",
+    guidanceTitle: "Vertel de klus in 4 korte punten",
+    guidanceTimeBadge: "± 30 sec",
+
+    prompt1Title: "Reden van de klus",
+    prompt1Desc: "Wat meldde de klant of wat was het probleem?",
+    prompt1Question: "Wat was de klacht of reden van de klus?",
+    prompt2Title: "Werkzaamheden",
+    prompt2Desc: "Wat heb je gecontroleerd, gemeten, vervangen of getest?",
+    prompt2Question: "Wat heb je gecontroleerd of uitgevoerd?",
+    prompt3Title: "Bevindingen",
+    prompt3Desc: "Wat zag je? Benoem twijfel als je iets niet zeker weet.",
+    prompt3Question: "Wat heb je gevonden of vastgesteld?",
+    prompt4Title: "Vervolg",
+    prompt4Desc: "Is extra controle, bestelling of een nieuwe afspraak nodig?",
+    prompt4Question: "Wat moet er hierna gebeuren?",
+
+    exampleLabel: "Spreek het liefst in deze volgorde",
+    exampleText: "“Klacht: de pomp maakt veel lawaai. Werkzaamheden: ik heb de pomp gecontroleerd en een los draadje opnieuw aangesloten. Bevindingen: het draadje zat los en de overige bedrading lijkt beschadigd. Vervolg: bij de volgende afspraak de bedrading opnieuw controleren.”",
+    exampleUseButton: "Gebruik dit voorbeeld",
+    exampleRawText: "Klacht: de pomp maakt veel lawaai. Werkzaamheden: ik heb de pomp gecontroleerd en een los draadje opnieuw aangesloten. Bevindingen: het draadje zat los en de overige bedrading lijkt beschadigd. Vervolg: bij de volgende afspraak de bedrading opnieuw controleren.",
+
+    step1Step: "Stap 1",
+    step1Title: "Spreek je notities in",
+    speechChecking: "Controleren…",
+    speechAvailable: "Microfoon beschikbaar",
+    speechUnsupported: "Niet ondersteund",
+    activeQuestionTipLabel: "Tip",
+    activeQuestionTipText: "Begin bijvoorbeeld met: “De klant meldde…”",
+    activeQuestionLabel: "Vraag",
+    micStart: "Opname starten",
+    micStop: "Opname stoppen",
+    recordingIndicatorText: "Luisteren… spreek rustig en duidelijk.",
+    rawTextLabel: "Gesproken tekst",
+    rawTextPlaceholder: "Je ingesproken notities verschijnen hier.",
+    clearSpeechButton: "Wis ingesproken tekst",
+    rawTextHint: "De rapportgenerator ondersteunt Nederlandse en Engelse werkomschrijvingen voor onderhoud, storing, montage, vervanging, elektra, leidingwerk, cv/ketel, motoren, ventilatie, sensoren, inspecties en meerdere problemen tegelijk. Controleer technische termen, merknamen en onderdeelnummers altijd handmatig.",
+
+    step2Step: "Stap 2",
+    step2Title: "Rapport genereren",
+    modelStatusTextDefault: "AI wordt geladen bij eerste rapport",
+    modelStatusDetailDefault: "De app opent direct. Pas bij “Genereer rapport” wordt het compacte model geladen.",
+    generateDefault: "Maak professioneel rapport",
+    generateLoading: "Model wordt geladen…",
+    generateMaking: "Rapport maken…",
+    generateSlow: "AI-model bezig… (schakelt zo nodig automatisch over)",
+    generateCancelling: "Annuleren…",
+    cancelButton: "Annuleren",
+
+    clarifyTitle: "Nog even dit voordat het rapport wordt gemaakt:",
+    clarifyEditButton: "Notities aanvullen",
+    clarifyForceButton: "Toch genereren zonder aanvulling",
+    clarifyShort: "De notitie is erg kort. Wat was de klacht of reden van de klus, wat heb je gedaan en wat heb je gevonden?",
+    clarifyReason: "Wat was de klacht of reden van de klus?",
+    clarifyWork: "Wat heb je gecontroleerd, gemeten, vervangen of getest?",
+    clarifyFindings: "Wat heb je gevonden of vastgesteld?",
+
+    step3Step: "Stap 3",
+    step3Title: "Controleer het rapport",
+    step3Badge: "Altijd controleren",
+    fallbackNotice: "ℹ️ Dit rapport is samengesteld met de snelle ingebouwde rapportgenerator (het AI-taalmodel reageerde niet op tijd). Controleer de tekst dus extra goed.",
+    technicianLabel: "Monteur",
+    reportDateLabel: "Datum",
+    workDoneLabel: "Uitgevoerde werkzaamheden",
+    findingsLabel: "Bevindingen",
+    nextStepsLabel: "Vervolgstappen",
+    reviewedLabel: "Ik heb het rapport gecontroleerd op technische fouten.",
+    editButton: "Bewerken",
+    copyButton: "Kopiëren",
+    pdfButton: "Download als PDF",
+    newButton: "Nieuw rapport",
+    copyNotice: "Rapport gekopieerd.",
+
+    footerBrand: "Servicerapport",
+    footerTagline: "Rapportage voor technische service & onderhoud",
+
+    errFillNotes: "Voer eerst gesproken of getypte notities in.",
+    errMicNotAllowed: "Microfoontoegang is geweigerd. Sta microfoontoegang toe in je browser.",
+    errNoSpeech: "Geen spraak gehoord. Probeer opnieuw en spreek duidelijk.",
+    errAudioCapture: "Er is geen werkende microfoon gevonden.",
+    errSpeechGeneric: "Spraakherkenning kon niet worden gestart.",
+    errSpeechUnsupported: "Deze browser ondersteunt geen ingebouwde spraakherkenning. Typ je notities handmatig.",
+    errMicStartFailed: "De microfoon kon niet worden gestart. Probeer opnieuw.",
+    errReviewFirstCopy: "Controleer het rapport eerst en vink aan dat je het hebt nagekeken.",
+    errReviewFirstPdf: "Controleer het rapport eerst en vink aan dat je het hebt nagekeken voordat je de PDF opslaat.",
+    errCopyFailed: "Kopiëren lukte niet automatisch. Selecteer de tekst handmatig.",
+    errReportGenericFail: "Het rapport kon niet worden gemaakt. Probeer het opnieuw.",
+    errAiTimeout: "AI-model reageerde niet op tijd.",
+
+    fallbackWorkEmpty: "Geen uitgevoerde werkzaamheden duidelijk uit de notities af te leiden.",
+    fallbackFindingsEmpty: "Geen afzonderlijke bevindingen duidelijk uit de notities af te leiden.",
+    fallbackNextEmpty: "Controleer opnieuw als de klacht terugkeert of volgens het onderhoudsschema.",
+    fallbackDefaultTitle: "Servicerapport",
+
+    pdfEyebrow: "TECHNISCHE SERVICE & ONDERHOUD",
+    pdfTechnicianPrefix: "Monteur: ",
+    pdfDatePrefix: "Datum: ",
+    pdfFooterBrand: "Servicerapport",
+    pdfFooterTagline: "Technische service & onderhoud",
+    pdfPagePrefix: "Pagina ",
+    pdfContinuationPrefix: "Vervolg — ",
+    pdfContinuationSuffix: " (vervolg)",
+    pdfNotFilled: "Niet ingevuld.",
+    pdfReviewHeading: "Controle",
+    pdfReviewText: "Dit rapport is door de monteur gecontroleerd voordat het is opgeslagen.",
+    pdfSectionWork: "Uitgevoerde werkzaamheden",
+    pdfSectionFindings: "Bevindingen",
+    pdfSectionNext: "Vervolgstappen",
+    pdfDefaultTitle: "Servicerapport",
+    pdfReportLabel: "SERVICERAPPORT",
+    pdfReportNoPrefix: "Rapportnr. ",
+    pdfPageOf: " van ",
+    pdfSignatureLabel: "Handtekening monteur",
+    pdfSignatureDateLabel: "Datum",
+
+    modelLoadingTitle: "Rapportmotor laden…",
+    modelLoadingDetail: "Eerste gebruik: het taalmodel wordt gedownload. Dit kan enkele minuten duren; daarna wordt het normaal uit de browsercache gebruikt.",
+    modelCompatTitle: "Compatibiliteitsmodus laden…",
+    modelCompatDetail: "WebGPU is niet beschikbaar op dit apparaat/deze browser. Het model wordt via de processor (CPU) geladen; dit is trager en genereren kan daardoor langer duren.",
+    modelRetryTitle: "Rapportmotor opnieuw laden…",
+    modelRetryDetail: "De eerste poging lukte niet meteen; de app probeert het automatisch nog een keer. Dit is meestal niets om je zorgen over te maken.",
+    modelReadyTitle: "Rapportmotor klaar",
+    modelReadyGpu: "Model geladen in deze browser (met GPU-versnelling).",
+    modelReadyCpu: "Model geladen in deze browser (zonder GPU-versnelling; genereren duurt langer).",
+    modelErrorTitle: "Rapportmotor kon niet laden",
+    modelErrorDetail: "Controleer de internetverbinding en gebruik bij voorkeur een recente versie van Chrome of Edge.",
+    modelFileLoading: "Modelbestand laden: ",
+    modelDownloading: "Model wordt gedownload en voorbereid.",
+    modelComponentLoaded: "Modelonderdeel geladen.",
+    modelCanGenerate: "Je kunt nu rapporten genereren.",
+    generatingTitle: "Rapport genereren…",
+    generatingDetailGpu: "De werkomschrijving wordt lokaal in je browser verwerkt (met GPU-versnelling).",
+    generatingDetailCpu: "De werkomschrijving wordt lokaal in je browser verwerkt (zonder GPU-versnelling; dit kan langer duren). Je kunt genereren annuleren als het te lang duurt.",
+    generatedReady: "Rapport gegenereerd. Controleer het resultaat altijd vóór opslaan.",
+    generationFailedTitle: "Genereren mislukt",
+    generationFailedGeneric: "Probeer opnieuw.",
+    generationCancelledMsg: "Genereren is geannuleerd.",
+    generationTimeoutMsg: "Genereren duurde langer dan {s} seconden en is gestopt. ",
+    generationTimeoutGpuHint: "Probeer een kortere of duidelijkere notitie.",
+    generationTimeoutCpuHint: "Deze browser/computer gebruikt geen GPU-versnelling (WebGPU), waardoor genereren traag is. Probeer een kortere notitie, of gebruik een recente Chrome/Edge met WebGPU-ondersteuning voor snellere resultaten.",
+    parseFailedMsg: "Het model gaf geen herkenbare rapportstructuur terug. Probeer dezelfde invoer nogmaals."
+  },
+  en: {
+    loginEyebrow: "Technical service",
+    loginTitle: "Service Report",
+    loginCopy: "Create fast, clear service reports after every job.",
+    userLabel: "User",
+    userPlaceholder: "e.g. Lennart",
+    loginButton: "Log in",
+    loginNote: "Your reports are linked to the name you enter here.",
+    loginFillFields: "Please enter your name.",
+    loginModelStatusText: "Preparing report engine…",
+    loginModelStatusDetail: "This happens in the background while you log in, so you won't have to wait later.",
+
+    appEyebrow: "Technical service",
+    appTitle: "Service Report",
+    logoutButtonLabel: "Log out",
+    welcomeStep: "Welcome",
+    welcomeText: "Create a report right after the job, so important details aren't lost.",
+    newReportBadge: "New report",
+    defaultTechnicianName: "Technician",
+
+    wizardStepOf: "STEP {n} OF 6",
+    wizardNext: "Next",
+    wizardPrev: "Previous",
+    wizardFieldRequired: "Fill in this part before continuing.",
+    wizardUseExample: "Use example input",
+    wizardMicHint: "Speak calmly in short sentences. You can still adjust technical terms afterwards.",
+    clearButtonShort: "Clear",
+    summaryEmpty: "Not filled in",
+
+    ws1Eyebrow: "1 · REASON FOR THE JOB",
+    ws1Title: "Why are you at the customer?",
+    ws1Subtitle: "Describe what the customer reported, what the job was, or why the inspection was needed.",
+    ws1Placeholder: "E.g. The customer reported a ticking noise from the fuse box.",
+
+    ws2Eyebrow: "2 · WORK PERFORMED",
+    ws2Title: "What did you do?",
+    ws2Subtitle: "Describe what you checked, measured, replaced or tested.",
+    ws2Placeholder: "E.g. I checked the main switch and circuits and measured the temperature.",
+
+    ws3Eyebrow: "3 · FINDINGS",
+    ws3Title: "What did you find?",
+    ws3Subtitle: "Describe what you determined. Mention any uncertainty if you're not sure.",
+    ws3Placeholder: "E.g. No abnormalities were found; the exact cause could not be determined with certainty.",
+
+    ws4Eyebrow: "4 · NEXT STEPS",
+    ws4Title: "What needs to happen next?",
+    ws4Subtitle: "Is extra inspection, ordering parts, or a new appointment needed? (optional)",
+    ws4Placeholder: "E.g. If the complaint returns, carry out a targeted follow-up check.",
+
+    ws5Eyebrow: "5 · REVIEW",
+    ws5Title: "Ready to create the report",
+    ws5Subtitle: "Quickly check that all four parts are filled in the way you intended.",
+
+    ws6Title: "Review the report",
+
+    sum1Title: "Reason",
+    sum2Title: "Work",
+    sum3Title: "Findings",
+    sum4Title: "Next steps",
+
+    exampleReason: "The pump is making a lot of noise.",
+    exampleWork: "I checked the pump and reconnected a loose wire.",
+    exampleFindings: "The wire was loose and the rest of the wiring looks damaged.",
+    exampleNext: "Check the wiring again at the next visit.",
+
+    guidanceStep: "What should you say?",
+    guidanceTitle: "Describe the job in 4 short points",
+    guidanceTimeBadge: "≈ 30 sec",
+
+    prompt1Title: "Reason for the job",
+    prompt1Desc: "What did the customer report, or what was the problem?",
+    prompt1Question: "What was the complaint or reason for the job?",
+    prompt2Title: "Work performed",
+    prompt2Desc: "What did you check, measure, replace or test?",
+    prompt2Question: "What did you check or carry out?",
+    prompt3Title: "Findings",
+    prompt3Desc: "What did you observe? Mention any uncertainty if you're not sure.",
+    prompt3Question: "What did you find or determine?",
+    prompt4Title: "Next steps",
+    prompt4Desc: "Is extra inspection, ordering parts, or a new appointment needed?",
+    prompt4Question: "What needs to happen next?",
+
+    exampleLabel: "Preferably speak in this order",
+    exampleText: "“Complaint: the pump is making a lot of noise. Work performed: I checked the pump and reconnected a loose wire. Findings: the wire was loose and the rest of the wiring looks damaged. Next steps: check the wiring again at the next visit.”",
+    exampleUseButton: "Use this example",
+    exampleRawText: "Complaint: the pump is making a lot of noise. Work performed: I checked the pump and reconnected a loose wire. Findings: the wire was loose and the rest of the wiring looks damaged. Next steps: check the wiring again at the next visit.",
+
+    step1Step: "Step 1",
+    step1Title: "Record your notes",
+    speechChecking: "Checking…",
+    speechAvailable: "Microphone available",
+    speechUnsupported: "Not supported",
+    activeQuestionTipLabel: "Tip",
+    activeQuestionTipText: "Start with something like: “The customer reported…”",
+    activeQuestionLabel: "Question",
+    micStart: "Start recording",
+    micStop: "Stop recording",
+    recordingIndicatorText: "Listening… speak calmly and clearly.",
+    rawTextLabel: "Spoken text",
+    rawTextPlaceholder: "Your recorded notes will appear here.",
+    clearSpeechButton: "Clear recorded text",
+    rawTextHint: "The report generator supports Dutch and English job descriptions for maintenance, faults, installation, replacement, electrical, piping, boilers, motors, ventilation, sensors, inspections and multiple issues at once. Always check technical terms, brand names and part numbers manually.",
+
+    step2Step: "Step 2",
+    step2Title: "Generate report",
+    modelStatusTextDefault: "AI loads when you create your first report",
+    modelStatusDetailDefault: "The app opens instantly. The compact model only loads once you tap “Generate report”.",
+    generateDefault: "Create professional report",
+    generateLoading: "Loading model…",
+    generateMaking: "Creating report…",
+    generateSlow: "AI model working… (will switch automatically if needed)",
+    generateCancelling: "Cancelling…",
+    cancelButton: "Cancel",
+
+    clarifyTitle: "Just a few things before the report is created:",
+    clarifyEditButton: "Add more detail",
+    clarifyForceButton: "Generate anyway without adding detail",
+    clarifyShort: "The note is very short. What was the complaint or reason for the job, what did you do, and what did you find?",
+    clarifyReason: "What was the complaint or reason for the job?",
+    clarifyWork: "What did you check, measure, replace or test?",
+    clarifyFindings: "What did you find or determine?",
+
+    step3Step: "Step 3",
+    step3Title: "Review the report",
+    step3Badge: "Always review",
+    fallbackNotice: "ℹ️ This report was created with the fast built-in report generator (the AI language model did not respond in time). Please review the text extra carefully.",
+    technicianLabel: "Technician",
+    reportDateLabel: "Date",
+    workDoneLabel: "Work performed",
+    findingsLabel: "Findings",
+    nextStepsLabel: "Next steps",
+    reviewedLabel: "I have checked this report for technical errors.",
+    editButton: "Edit",
+    copyButton: "Copy",
+    pdfButton: "Download as PDF",
+    newButton: "New report",
+    copyNotice: "Report copied.",
+
+    footerBrand: "Service Report",
+    footerTagline: "Reporting for technical service & maintenance",
+
+    errFillNotes: "Enter spoken or typed notes first.",
+    errMicNotAllowed: "Microphone access was denied. Please allow microphone access in your browser.",
+    errNoSpeech: "No speech detected. Please try again and speak clearly.",
+    errAudioCapture: "No working microphone was found.",
+    errSpeechGeneric: "Speech recognition could not be started.",
+    errSpeechUnsupported: "This browser does not support built-in speech recognition. Please type your notes manually.",
+    errMicStartFailed: "The microphone could not be started. Please try again.",
+    errReviewFirstCopy: "Please review the report first and check that you've verified it.",
+    errReviewFirstPdf: "Please review the report first and check that you've verified it before saving the PDF.",
+    errCopyFailed: "Copying failed automatically. Please select the text manually.",
+    errReportGenericFail: "The report could not be created. Please try again.",
+    errAiTimeout: "AI model did not respond in time.",
+
+    fallbackWorkEmpty: "No clear work performed could be derived from the notes.",
+    fallbackFindingsEmpty: "No clear separate findings could be derived from the notes.",
+    fallbackNextEmpty: "Check again if the complaint returns, or according to the maintenance schedule.",
+    fallbackDefaultTitle: "Service report",
+
+    pdfEyebrow: "TECHNICAL SERVICE & MAINTENANCE",
+    pdfTechnicianPrefix: "Technician: ",
+    pdfDatePrefix: "Date: ",
+    pdfFooterBrand: "Service Report",
+    pdfFooterTagline: "Technical service & maintenance",
+    pdfPagePrefix: "Page ",
+    pdfContinuationPrefix: "Continued — ",
+    pdfContinuationSuffix: " (continued)",
+    pdfNotFilled: "Not filled in.",
+    pdfReviewHeading: "Review",
+    pdfReviewText: "This report was reviewed by the technician before it was saved.",
+    pdfSectionWork: "Work performed",
+    pdfSectionFindings: "Findings",
+    pdfSectionNext: "Next steps",
+    pdfDefaultTitle: "Service report",
+    pdfReportLabel: "SERVICE REPORT",
+    pdfReportNoPrefix: "Report No. ",
+    pdfPageOf: " of ",
+    pdfSignatureLabel: "Technician signature",
+    pdfSignatureDateLabel: "Date",
+
+    modelLoadingTitle: "Loading report engine…",
+    modelLoadingDetail: "First use: the language model is being downloaded. This can take a few minutes; after that it will normally be served from the browser cache.",
+    modelCompatTitle: "Loading compatibility mode…",
+    modelCompatDetail: "WebGPU is not available on this device/browser. The model will be loaded via the processor (CPU); this is slower, so generating may take longer.",
+    modelRetryTitle: "Reloading report engine…",
+    modelRetryDetail: "The first attempt didn't succeed right away; the app is automatically trying again. This usually isn't anything to worry about.",
+    modelReadyTitle: "Report engine ready",
+    modelReadyGpu: "Model loaded in this browser (with GPU acceleration).",
+    modelReadyCpu: "Model loaded in this browser (without GPU acceleration; generating will take longer).",
+    modelErrorTitle: "Report engine failed to load",
+    modelErrorDetail: "Check your internet connection and preferably use a recent version of Chrome or Edge.",
+    modelFileLoading: "Loading model file: ",
+    modelDownloading: "Model is being downloaded and prepared.",
+    modelComponentLoaded: "Model component loaded.",
+    modelCanGenerate: "You can now generate reports.",
+    generatingTitle: "Generating report…",
+    generatingDetailGpu: "The job description is being processed locally in your browser (with GPU acceleration).",
+    generatingDetailCpu: "The job description is being processed locally in your browser (without GPU acceleration; this may take longer). You can cancel generation if it takes too long.",
+    generatedReady: "Report generated. Always check the result before saving.",
+    generationFailedTitle: "Generation failed",
+    generationFailedGeneric: "Please try again.",
+    generationCancelledMsg: "Generation was cancelled.",
+    generationTimeoutMsg: "Generation took longer than {s} seconds and was stopped. ",
+    generationTimeoutGpuHint: "Try a shorter or clearer note.",
+    generationTimeoutCpuHint: "This browser/computer isn't using GPU acceleration (WebGPU), which makes generating slow. Try a shorter note, or use a recent Chrome/Edge with WebGPU support for faster results.",
+    parseFailedMsg: "The model did not return a recognizable report structure. Please try the same input again."
+  }
+};
+
+function getLanguage() {
+  return localStorage.getItem("appLanguage") === "en" ? "en" : "nl";
+}
+
+function t(key) {
+  const lang = getLanguage();
+  return (I18N[lang] && I18N[lang][key] !== undefined) ? I18N[lang][key] : (I18N.nl[key] !== undefined ? I18N.nl[key] : key);
+}
+
+window.I18N = I18N;
+window.getAppLanguage = getLanguage;
+window.t = t;
+
+function applyLanguage() {
+  document.documentElement.lang = getLanguage();
+
+  document.querySelectorAll(".lang-pill").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === getLanguage());
+  });
+
+  // Login-scherm
+  if ($("loginEyebrow")) $("loginEyebrow").textContent = t("loginEyebrow");
+  if ($("loginTitle")) $("loginTitle").textContent = t("loginTitle");
+  if ($("loginCopy")) $("loginCopy").textContent = t("loginCopy");
+  if ($("userLabel")) $("userLabel").textContent = t("userLabel");
+  if (emailInput) emailInput.placeholder = t("userPlaceholder");
+  if ($("loginButton")) $("loginButton").textContent = t("loginButton");
+  if ($("loginNote")) $("loginNote").textContent = t("loginNote");
+  if ($("loginModelStatusText") && !window.modelStatusTouched) $("loginModelStatusText").textContent = t("loginModelStatusText");
+  if ($("loginModelStatusDetail") && !window.modelStatusTouched) $("loginModelStatusDetail").textContent = t("loginModelStatusDetail");
+
+  // Hoofd-app
+  if ($("appEyebrow")) $("appEyebrow").textContent = t("appEyebrow");
+  if ($("appTitle")) $("appTitle").textContent = t("appTitle");
+  if ($("logoutButtonLabel")) $("logoutButtonLabel").textContent = t("logoutButtonLabel");
+  if ($("logoutButton")) $("logoutButton").title = t("logoutButtonLabel");
+  if ($("footerBrand")) $("footerBrand").textContent = t("footerBrand");
+  if ($("footerTagline")) $("footerTagline").textContent = t("footerTagline");
+
+  // Wizardstappen 1-4 (Reden / Werkzaamheden / Bevindingen / Vervolg)
+  [1, 2, 3, 4].forEach(n => {
+    if ($(`ws${n}Eyebrow`)) $(`ws${n}Eyebrow`).textContent = t(`ws${n}Eyebrow`);
+    if ($(`ws${n}Title`)) $(`ws${n}Title`).textContent = t(`ws${n}Title`);
+    if ($(`ws${n}Subtitle`)) $(`ws${n}Subtitle`).textContent = t(`ws${n}Subtitle`);
+    if ($(`wizardMicHint${n}`)) $(`wizardMicHint${n}`).textContent = t("wizardMicHint");
+    if ($(`recordingIndicatorText${n}`)) $(`recordingIndicatorText${n}`).textContent = t("recordingIndicatorText");
+    if ($(`sum${n}Title`)) $(`sum${n}Title`).textContent = t(`sum${n}Title`);
+    const fieldKey = WIZARD_FIELDS[n - 1].key;
+    const inputEl = $(WIZARD_FIELDS[n - 1].input);
+    if (inputEl) inputEl.placeholder = t(`ws${n}Placeholder`);
+  });
+  if ($("wizardUseExampleButton")) $("wizardUseExampleButton").textContent = t("wizardUseExample");
+
+  document.querySelectorAll("[data-next]").forEach(btn => btn.textContent = t("wizardNext") + " →");
+  document.querySelectorAll("[data-prev]").forEach(btn => btn.textContent = "← " + t("wizardPrev"));
+  document.querySelectorAll("[data-clear]").forEach(btn => btn.textContent = t("clearButtonShort"));
+  document.querySelectorAll(".mic-btn-label").forEach(el => {
+    const btn = el.closest(".mic-button-inline");
+    const isActiveRecording = isRecording && btn && btn.dataset.field === activeMicField;
+    el.textContent = isActiveRecording ? t("micStop") : t("micStart");
+  });
+
+  // Wizardstap 5 (controle)
+  if ($("ws5Eyebrow")) $("ws5Eyebrow").textContent = t("ws5Eyebrow");
+  if ($("ws5Title")) $("ws5Title").textContent = t("ws5Title");
+  if ($("ws5Subtitle")) $("ws5Subtitle").textContent = t("ws5Subtitle");
+  if ($("modelStatusText") && !window.modelStatusTouched) $("modelStatusText").textContent = t("modelStatusTextDefault");
+  if ($("modelStatusDetail") && !window.modelStatusTouched) $("modelStatusDetail").textContent = t("modelStatusDetailDefault");
+  if (generateLabel && !isGenerating) generateLabel.textContent = "✨ " + t("generateDefault");
+  if ($("cancelGenerateButton")) $("cancelGenerateButton").textContent = "✕ " + t("cancelButton");
+  if (typeof refreshSummary === "function") refreshSummary();
+
+  // Rapportstap (6)
+  if ($("step3Title")) $("step3Title").textContent = t("ws6Title");
+  if ($("step3Badge")) $("step3Badge").textContent = t("step3Badge");
+  if ($("fallbackNotice")) $("fallbackNotice").textContent = t("fallbackNotice");
+  if ($("technicianLabel")) $("technicianLabel").textContent = t("technicianLabel");
+  if ($("reportDateLabel")) $("reportDateLabel").textContent = t("reportDateLabel");
+  if ($("workDoneLabel")) $("workDoneLabel").textContent = t("workDoneLabel");
+  if ($("findingsLabel")) $("findingsLabel").textContent = t("findingsLabel");
+  if ($("nextStepsLabel")) $("nextStepsLabel").textContent = t("nextStepsLabel");
+  if ($("reviewedLabel")) $("reviewedLabel").textContent = t("reviewedLabel");
+  if ($("editButton")) $("editButton").textContent = "✏️ " + t("editButton");
+  if ($("copyButton")) $("copyButton").textContent = "📋 " + t("copyButton");
+  if ($("pdfButton")) $("pdfButton").textContent = "📄 " + t("pdfButton");
+  if ($("newButton")) $("newButton").textContent = "↻ " + t("newButton");
+  if ($("copyNotice")) $("copyNotice").textContent = t("copyNotice");
+
+  if (recognition) recognition.lang = getLanguage() === "en" ? "en-US" : "nl-NL";
+  if (typeof updateWizardHead === "function") updateWizardHead(wizardStep);
+}
+
+// Onthoudt of de status-teksten al door echte gebeurtenissen (model laden
+// e.d.) zijn overschreven, zodat een taalwissel dat niet per ongeluk
+// terugzet naar de standaardtekst terwijl er bijvoorbeeld al een
+// foutmelding staat.
+window.modelStatusTouched = false;
+
+document.querySelectorAll(".lang-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+    localStorage.setItem("appLanguage", btn.dataset.lang === "en" ? "en" : "nl");
+    applyLanguage();
+  });
+});
+
+const loginScreen = $("loginScreen");
+const app = $("app");
+const emailInput = $("emailInput");
+const loginError = $("loginError");
+
+function enterApp(name="Monteur") {
+  loginScreen.classList.add("hidden");
+  app.classList.remove("hidden");
+  if ($("technicianDisplay")) $("technicianDisplay").textContent = name;
+  sessionStorage.setItem("loggedIn", "1");
+  sessionStorage.setItem("technicianName", name);
+  if (typeof setDefaultReportMeta === "function") setDefaultReportMeta();
+  setTimeout(() => {
+    if (typeof window.prepareBrowserAI === "function") {
+      window.prepareBrowserAI();
+    }
+  }, 150);
+}
+
+$("loginButton").addEventListener("click", () => {
+  loginError.classList.add("hidden");
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    loginError.textContent = t("loginFillFields");
+    loginError.classList.remove("hidden");
+    return;
+  }
+
+  const name = email.trim();
+  enterApp(name.charAt(0).toUpperCase() + name.slice(1));
+});
+
+function submitLoginOnEnter(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    $("loginButton").click();
+  }
+}
+
+emailInput.addEventListener("keydown", submitLoginOnEnter);
+
+$("logoutButton").addEventListener("click", () => {
+  sessionStorage.removeItem("loggedIn");
+  sessionStorage.removeItem("technicianName");
+  app.classList.add("hidden");
+  loginScreen.classList.remove("hidden");
+});
+
+if (sessionStorage.getItem("loggedIn") === "1") enterApp(sessionStorage.getItem("technicianName") || "Monteur");
+
+const generateButton = $("generateButton");
+const generateLabel = $("generateLabel");
+const cancelGenerateButton = $("cancelGenerateButton");
+const errorBox = $("errorBox");
+const reportSection = $("reportSection");
+const fallbackNotice = $("fallbackNotice");
+const workDone = $("workDone");
+const findings = $("findings");
+const nextSteps = $("nextSteps");
+const copyNotice = $("copyNotice");
+
+let isGenerating = false;
+
+// Houdt de generate-knop in sync met de laadstatus van het lokale taalmodel,
+// zodat direct duidelijk is wanneer er gewacht moet worden op het model.
+window.addEventListener("reportEngineStatus", (event) => {
+  const { state } = event.detail || {};
+  if (isGenerating) return;
+  if (state === "loading") {
+    generateButton.disabled = true;
+    generateLabel.textContent = "⏳ " + t("generateLoading");
+  } else if (state === "ready") {
+    generateButton.disabled = false;
+    generateLabel.textContent = "✨ " + t("generateDefault");
+  } else if (state === "error") {
+    generateButton.disabled = false;
+    generateLabel.textContent = "✨ " + t("generateDefault");
+  }
+});
+
+// Gedeelde herkenningspatronen: gebruikt om (zonder AI) een rapport samen te
+// stellen uit de vier apart ingevoerde onderdelen.
+const REASON_RE = /\b(klacht|probleem|melding|meldde|gemeld|storing|reden van|klaagde|complaint|reported|issue)\b/i;
+const WORK_RE = /\b(gecontroleerd|getest|vervangen|geplaatst|gemonteerd|schoongemaakt|gerepareerd|hersteld|aangesloten|losgekoppeld|gekalibreerd|afgesteld|opnieuw opgestart|doorgespoeld|afgetapt|gevuld|ontlucht|vastgezet|checked|tested|replaced|installed|repaired|fixed|inspected|cleaned|measured|calibrated|adjusted)\b/i;
+const FINDINGS_RE = /\b(bevind\w*|vastgesteld|bleek|constateerde|gevonden|found|discovered|noticed|turned out|geen bijzonderheden|geen afwijkingen|no issues|no abnormalities)\b/i;
+const NEXT_RE = /\b(vervolg\w*|volgende afspraak|volgende controle|opnieuw contact|onderhoudsschema|monitor\w*|follow[\s-]?up|next visit|check again|gerichte controle)\b/i;
+const STATE_ISSUE_RE = /\b(zat|zaten|was|waren|bleek|bleken|leek|leken)\b[^.!?;\n]{0,25}\b(los|defect|versleten|kapot|lek|lekkage|beschadigd|verstopt|geblokkeerd|overbelast|doorgebrand|kortsluiting)\b/i;
+
+// ---------------------------------------------------------------------------
+// Lokale, deterministische rapportgenerator (geen AI-model nodig).
+// Dit is het betrouwbare vangnet: hiermee komt er altijd een rapport uit,
+// ook als het AI-model traag is, vastloopt of geen WebGPU/CPU-ondersteuning
+// heeft. Het AI-model wordt nog steeds als eerste geprobeerd (voor vloeiender
+// taalgebruik), maar zodra dat te lang duurt of mislukt, valt de app hierop
+// terug in plaats van de monteur zonder rapport te laten zitten.
+// ---------------------------------------------------------------------------
+
+const SECTION_LABELS = {
+  "klacht": "reason", "reden": "reason", "reden van de klus": "reason", "aanleiding": "reason",
+  "complaint": "reason", "reason": "reason",
+  "werkzaamheden": "work", "uitgevoerde werkzaamheden": "work", "work": "work", "work done": "work", "work performed": "work", "actions": "work",
+  "bevindingen": "findings", "findings": "findings", "resultaat": "findings", "results": "findings",
+  "vervolg": "next", "vervolgstappen": "next", "vervolgstap": "next",
+  "next steps": "next", "next step": "next", "follow up": "next", "follow-up": "next"
+};
+
+function splitIntoSentences(text) {
+  return String(text || "")
+    .split(/(?<=[.!?;])\s+|\n+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function toSentenceCase(sentence) {
+  const trimmed = String(sentence || "").replace(/[\s.;]+$/, "").trim();
+  if (!trimmed) return "";
+  const withPeriod = trimmed + ".";
+  return withPeriod.charAt(0).toUpperCase() + withPeriod.slice(1);
+}
+
+// Herkent expliciet gelabelde notities zoals in het gegeven voorbeeld
+// ("Klacht: ... Werkzaamheden: ... Bevindingen: ... Vervolg: ...").
+function splitLabeledSections(text) {
+  const labelPattern = Object.keys(SECTION_LABELS)
+    .sort((a, b) => b.length - a.length)
+    .map(l => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|");
+  const re = new RegExp(`\\b(${labelPattern})\\s*:`, "gi");
+  const matches = [...text.matchAll(re)];
+  if (matches.length < 2) return null;
+
+  const buckets = { reason: [], work: [], findings: [], next: [] };
+  for (let i = 0; i < matches.length; i++) {
+    const bucketKey = SECTION_LABELS[matches[i][1].toLowerCase()];
+    if (!bucketKey) continue;
+    const start = matches[i].index + matches[i][0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    const segment = text.slice(start, end).trim();
+    if (segment) buckets[bucketKey].push(segment);
+  }
+  return buckets;
+}
+
+function buildRuleBasedReport(rawInput) {
+  const normalized = getLanguage() === "en"
+    ? String(rawInput || "")
+    : normalizeEnglishTechnicalInput(String(rawInput || ""));
+
+  const work = [];
+  const findings = [];
+  const next = [];
+  const seen = new Set();
+
+  function pushUnique(bucket, sentence) {
+    const clean = toSentenceCase(sentence);
+    const key = clean.toLowerCase();
+    if (!clean || seen.has(key)) return;
+    seen.add(key);
+    bucket.push(clean);
+  }
+
+  const labeled = splitLabeledSections(normalized);
+
+  if (labeled) {
+    splitIntoSentences(labeled.reason.join(" ")).forEach(s => pushUnique(findings, s));
+    splitIntoSentences(labeled.work.join(" ")).forEach(s => pushUnique(work, s));
+    splitIntoSentences(labeled.findings.join(" ")).forEach(s => pushUnique(findings, s));
+    splitIntoSentences(labeled.next.join(" ")).forEach(s => pushUnique(next, s));
+  } else {
+    splitIntoSentences(normalized).forEach(sentence => {
+      if (WORK_RE.test(sentence)) {
+        pushUnique(work, sentence);
+      } else if (NEXT_RE.test(sentence)) {
+        pushUnique(next, sentence);
+      } else if (FINDINGS_RE.test(sentence) || STATE_ISSUE_RE.test(sentence) || REASON_RE.test(sentence)) {
+        pushUnique(findings, sentence);
+      } else if (/^(ik|we|wij)\s+(heb|hebben)\b/i.test(sentence)) {
+        pushUnique(work, sentence);
+      } else {
+        pushUnique(findings, sentence);
+      }
+    });
+  }
+
+  return {
+    title: createJobTitle(work.join(" "), findings.join(" ")) || t("fallbackDefaultTitle"),
+    work,
+    findings,
+    next_steps: next
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Stapsgewijze wizard: de klus wordt in 4 losse onderdelen opgevraagd
+// (Reden / Werkzaamheden / Bevindingen / Vervolg), daarna een controlestap
+// (5) en tot slot het gegenereerde rapport (6).
+// ---------------------------------------------------------------------------
+const WIZARD_FIELDS = [
+  { key: "reason", input: "inputReason" },
+  { key: "work", input: "inputWork" },
+  { key: "findings", input: "inputFindings" },
+  { key: "next", input: "inputNext" }
+];
+const WIZARD_REQUIRED = { reason: true, work: true, findings: true, next: false };
+
+let wizardStep = 1;
+
+function fieldEl(key) {
+  const cfg = WIZARD_FIELDS.find(f => f.key === key);
+  return cfg ? $(cfg.input) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Automatische spellingcorrectie (NL + EN). Geen netwerk/woordenboek nodig:
+// een curatieve lijst met veelvoorkomende type- en spelfouten (vooral rond
+// de technische termen die in dit soort rapporten voorkomen) wordt
+// woord-voor-woord gecorrigeerd, met behoud van hoofdletters.
+// ---------------------------------------------------------------------------
+const SPELL_FIXES_EN = {
+  teh: "the", adn: "and", recieve: "receive", recieved: "received",
+  seperate: "separate", occured: "occurred", untill: "until",
+  becuase: "because", definately: "definitely", wich: "which",
+  allways: "always", funtion: "function", mallfunction: "malfunction",
+  electricaly: "electrically", temprature: "temperature", presure: "pressure",
+  leackage: "leakage", vibrashun: "vibration", noize: "noise",
+  checkd: "checked", testd: "tested", replacd: "replaced",
+  installd: "installed", repared: "repaired", fixd: "fixed",
+  inspeced: "inspected", cleand: "cleaned", mesured: "measured",
+  calibratd: "calibrated", adjustd: "adjusted", tightend: "tightened",
+  reconected: "reconnected", reconect: "reconnect", disconected: "disconnected",
+  conector: "connector", conectors: "connectors", conection: "connection",
+  conections: "connections", maaking: "making", loks: "looks",
+  lookes: "looks", damged: "damaged", damadged: "damaged", damage: "damage",
+  fould: "found", discoverd: "discovered", apeared: "appeared",
+  wether: "whether", recieves: "receives", recieving: "receiving",
+  begining: "beginning", wierd: "weird", definetly: "definitely"
+};
+const SPELL_FIXES_NL = {
+  gecontroleert: "gecontroleerd", gerepareert: "gerepareerd",
+  gemonteert: "gemonteerd", afgesteldt: "afgesteld",
+  schoongemaakd: "schoongemaakt", herstelt: "hersteld",
+  losgekoppelt: "losgekoppeld", gekalibreert: "gekalibreerd",
+  doorgespoelt: "doorgespoeld", beschadigt: "beschadigd",
+  geblokeerd: "geblokkeerd", lekage: "lekkage", stoting: "storing",
+  defact: "defect", versleeten: "versleten", kortgesloten: "kortgesloten",
+  aangesloten: "aangesloten", onderhoudt: "onderhoud", gevuld: "gevuld",
+  vervangd: "vervangen", gemeeten: "gemeten", getesed: "getest",
+  afgetabt: "afgetapt", ontluch: "ontlucht", vastgezed: "vastgezet",
+  problem: "probleem", klaxt: "klacht", maakd: "maakt", oplosst: "oplost",
+  rijde: "rijden", remme: "remmen", geplant: "gepland",
+  gemaakd: "gemaakt", gestelt: "gesteld", opgelosst: "opgelost",
+  gewerkd: "gewerkt", gedraait: "gedraaid"
+};
+
+// Alleen corrigeren wanneer "lose" duidelijk "loose" had moeten zijn —
+// "lose" is op zichzelf een geldig Engels woord, dus niet blind vervangen:
+// (1) direct gevolgd door een onderdeel zoals "wire"/"connector", of
+// (2) direct na een vorm van "to be" ("is/was/are lose"), wat grammaticaal
+// altijd een typefout voor het bijvoeglijk naamwoord "loose" is.
+const EN_LOSE_LOOSE_NOUN_RE = /\blose\b(?=\s+(wire|wiring|connector|connectors|connection|cable|screw|nut|bolt|fitting|coupling|joint|part))/gi;
+const EN_LOSE_LOOSE_BE_RE = /\b(am|is|are|was|were|being|very|too|so|quite|really)(\s+)lose\b/gi;
+
+function matchCase(original, replacement) {
+  if (original === original.toUpperCase() && original.length > 1) return replacement.toUpperCase();
+  if (original[0] === original[0].toUpperCase()) {
+    return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+  }
+  return replacement;
+}
+
+function applySpellingFixes(text, lang) {
+  if (!text) return text;
+  const dict = lang === "en" ? SPELL_FIXES_EN : SPELL_FIXES_NL;
+  let result = String(text).replace(/\b[\p{L}'-]+\b/gu, (word) => {
+    const fix = dict[word.toLowerCase()];
+    return fix ? matchCase(word, fix) : word;
+  });
+  if (lang === "en") {
+    result = result.replace(EN_LOSE_LOOSE_NOUN_RE, (m) => matchCase(m, "loose"));
+    result = result.replace(EN_LOSE_LOOSE_BE_RE, (_m, aux, space) => `${aux}${space}loose`);
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// Verdergaande correctie: grammatica en logisch woordgebruik, niet alleen
+// losse spelfouten. Dit vangt dingen op die een woordenboek alleen (hierboven)
+// mist, zoals een vervoeging die niet klopt ("De monteur Lees de auto uit"
+// → "De monteur leest de auto uit") of een woord dat op zichzelf correct
+// gespeld is maar hier niets betekent ("de klant mijl dat" → "de klant meldt
+// dat"). Dit draait zowel over wat de monteur intypt als over wat het
+// rapport (AI of de vaste rapportgenerator) uiteindelijk oplevert, zodat ook
+// AI-tekst hiermee wordt opgeschoond.
+// ---------------------------------------------------------------------------
+
+// Onderwerp + werkwoordsvorm: als na "de monteur/klant/auto/hij/zij" een
+// bekende kale of verkeerd vervoegde werkwoordsvorm volgt, wordt die naar de
+// juiste derde persoon enkelvoud gezet (en meteen ook de ongewenste
+// hoofdletter middenin de zin weggehaald).
+const NL_VERB_3SG_MAP = {
+  lees: "leest", controleer: "controleert", vervang: "vervangt",
+  monteer: "monteert", demonteer: "demonteert", stel: "stelt",
+  draai: "draait", verwijder: "verwijdert", plaats: "plaatst",
+  check: "checkt", herstel: "herstelt", spoel: "spoelt",
+  vul: "vult", koppel: "koppelt", smeer: "smeert", reinig: "reinigt",
+  sluit: "sluit", meet: "meet", test: "test", reset: "reset",
+  tapt: "tapt", vervangt: "vervangt", onderzoek: "onderzoekt",
+  bekijk: "bekijkt", start: "start", herstart: "herstart",
+  kalibreer: "kalibreert", repareer: "repareert", open: "opent",
+  sluit_af: "sluit af"
+};
+const NL_SUBJECTS_RE = "(de monteur|de klant|de auto|hij|zij)";
+const NL_SUBJECT_VERB_RE = new RegExp(`\\b${NL_SUBJECTS_RE}(\\s+)([a-zà-ÿ]+)\\b`, "gi");
+
+function fixSubjectVerbAgreementNL(text) {
+  return String(text).replace(NL_SUBJECT_VERB_RE, (match, subject, space, verb) => {
+    const fixed = NL_VERB_3SG_MAP[verb.toLowerCase()];
+    return fixed ? `${subject}${space}${fixed}` : match;
+  });
+}
+
+// Woorden/uitdrukkingen die op zichzelf correct gespeld zijn maar in deze
+// context een ander, verkeerd woord zijn (logisch woordgebruik), en veel
+// voorkomende samenstellingen die los van elkaar zijn getikt terwijl het in
+// het Nederlands één woord moet zijn.
+const PHRASE_FIXES_NL = [
+  [/\bklant mijl\b/gi, "klant meldt"],
+  [/\bklant meld\b/gi, "klant meldt"],
+  [/\bmonteur lees\b/gi, "monteur leest"],
+  [/\bmotor\s*storings\s*lamp(je)?\b/gi, "storingslampje"],
+  [/\bstorings\s+lamp(je)?\b/gi, "storingslampje"],
+  [/\bcontrole\s+lamp(je)?\b/gi, "controlelampje"],
+  [/\blucht\s*massameter\b/gi, "luchtmassameter"],
+  [/\bfout\s*code(s)?\b/gi, "foutcode$1"],
+  [/\bmotor\s*computer\b/gi, "motorcomputer"],
+  [/\bmotor\s*storing(en)?\b/gi, "motorstoring$1"],
+  [/\bolie peil\b/gi, "oliepeil"],
+  [/\bolie lek(kage)?\b/gi, "olielekkage"],
+  [/\brem blokken\b/gi, "remblokken"],
+  [/\brem schijven\b/gi, "remschijven"],
+  [/\bversnellings bak\b/gi, "versnellingsbak"],
+  [/\baccu spanning\b/gi, "accuspanning"],
+  [/\bonderhouds schema\b/gi, "onderhoudsschema"]
+];
+const PHRASE_FIXES_EN = [
+  [/\berror code(s)?\b/gi, "error code$1"],
+  [/\bwarning light(s)?\b/gi, "warning light$1"]
+];
+
+function applyPhraseFixes(text, lang) {
+  const list = lang === "en" ? PHRASE_FIXES_EN : PHRASE_FIXES_NL;
+  let result = String(text || "");
+  for (const [from, to] of list) result = result.replace(from, to);
+  return result;
+}
+
+// "word" is maar in één geval correct: eerste persoon enkelvoud ("ik word
+// moe"). Overal elders (het onderwerp is "de auto", "het lampje", "hij",
+// "de klant", enz.) hoort het "wordt" te zijn — een van de meest voorkomende
+// Nederlandse spelfouten. Daarom alleen vervangen als "word" niet direct op
+// "ik " volgt.
+const NL_WORD_WORDT_RE = /\b(?<!ik\s)word\b/gi;
+
+function fixWordWordtNL(text) {
+  return String(text || "").replace(NL_WORD_WORDT_RE, (m) => matchCase(m, "wordt"));
+}
+
+// Een hoofdletter midden in een zin (niet na een punt, en niet bij het begin
+// van de tekst) is bijna altijd een foutje — bijvoorbeeld tekst die letterlijk
+// is overgenomen uit wat de monteur intypte. Bekende afkortingen en
+// merk-/apparatuurnamen staan op een uitzonderingslijst en blijven staan.
+const CAPS_EXCEPTIONS = new Set([
+  "ABS", "ECU", "GPS", "LED", "OBD", "BMW", "VAG", "WD-40", "AI",
+  "NL", "EN", "DPF", "EGR", "TPMS", "CVT"
+]);
+
+function fixMidSentenceCapitalization(text) {
+  return String(text || "").replace(/([a-zà-ÿ,]\s+)([A-ZÀ-Ý][a-zà-ÿ]+)\b/g, (match, before, word) => {
+    if (CAPS_EXCEPTIONS.has(word.toUpperCase())) return match;
+    return before + word.charAt(0).toLowerCase() + word.slice(1);
+  });
+}
+
+function correctText(text, lang) {
+  if (!text) return text;
+  let result = applySpellingFixes(text, lang);
+  result = applyPhraseFixes(result, lang);
+  if (lang !== "en") {
+    result = fixWordWordtNL(result);
+    result = fixSubjectVerbAgreementNL(result);
+  }
+  result = fixMidSentenceCapitalization(result);
+  result = result.replace(/\s{2,}/g, " ").trim();
+  return result;
+}
+
+function fieldValue(key) {
+  const el = fieldEl(key);
+  if (!el) return "";
+  const corrected = correctText(el.value, getLanguage()).trim();
+  if (corrected !== el.value.trim() && document.activeElement !== el) {
+    el.value = corrected;
+  }
+  return corrected;
+}
+
+function formatDisplayDate(dateStr) {
+  const parts = String(dateStr || "").split("-");
+  if (parts.length !== 3) return dateStr;
+  const [yy, mm, dd] = parts;
+  return getLanguage() === "en" ? `${mm}/${dd}/${yy}` : `${dd}-${mm}-${yy}`;
+}
+
+function updateWizardHead(n) {
+  if ($("wizardStepLabel")) $("wizardStepLabel").textContent = t("wizardStepOf").replace("{n}", n);
+  if ($("wizardStepTitle")) $("wizardStepTitle").textContent = t(n === 6 ? "ws6Title" : `ws${n}Title`);
+  if ($("wizardProgressBar")) $("wizardProgressBar").style.width = (n / 6 * 100) + "%";
+  if ($("wizardMetaName") && $("wizardMetaDate")) {
+    const name = sessionStorage.getItem("technicianName") || t("defaultTechnicianName");
+    const dateVal = ($("reportDate") && $("reportDate").value) || new Date().toISOString().slice(0, 10);
+    $("wizardMetaName").textContent = name;
+    $("wizardMetaDate").textContent = formatDisplayDate(dateVal);
+  }
+}
+
+function refreshSummary() {
+  WIZARD_FIELDS.forEach((f, idx) => {
+    const preview = $(`sum${idx + 1}Preview`);
+    if (!preview) return;
+    const val = fieldValue(f.key);
+    preview.textContent = val ? (val.length > 70 ? val.slice(0, 70) + "…" : val) : t("summaryEmpty");
+  });
+}
+
+function showWizardPanel(n) {
+  [1, 2, 3, 4, 5].forEach(i => {
+    const panel = $(`wizardStep${i}`);
+    if (panel) panel.classList.toggle("hidden", i !== n);
+  });
+  reportSection.classList.add("hidden");
+  hideError();
+  wizardStep = n;
+  if (n === 5) refreshSummary();
+  updateWizardHead(n);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showReportStep() {
+  [1, 2, 3, 4, 5].forEach(i => {
+    const panel = $(`wizardStep${i}`);
+    if (panel) panel.classList.add("hidden");
+  });
+  reportSection.classList.remove("hidden");
+  wizardStep = 6;
+  updateWizardHead(6);
+  reportSection.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+document.querySelectorAll(".wizard-panel [data-next]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const panel = btn.closest(".wizard-panel");
+    const n = parseInt(panel.dataset.step, 10);
+    const field = WIZARD_FIELDS[n - 1];
+    if (field && WIZARD_REQUIRED[field.key] && !fieldValue(field.key)) {
+      showError(t("wizardFieldRequired"));
+      return;
+    }
+    hideError();
+    showWizardPanel(n + 1);
+  });
+});
+
+document.querySelectorAll(".wizard-panel [data-prev]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const panel = btn.closest(".wizard-panel");
+    const n = parseInt(panel.dataset.step, 10);
+    showWizardPanel(Math.max(1, n - 1));
+  });
+});
+
+document.querySelectorAll(".summary-card").forEach(btn => {
+  btn.addEventListener("click", () => showWizardPanel(parseInt(btn.dataset.goto, 10)));
+});
+
+$("wizardUseExampleButton").addEventListener("click", () => {
+  $("inputReason").value = t("exampleReason");
+  $("inputWork").value = t("exampleWork");
+  $("inputFindings").value = t("exampleFindings");
+  $("inputNext").value = t("exampleNext");
+});
+
+// Corrigeer spelfouten direct zodra de monteur een veld verlaat, zodat de
+// fout al zichtbaar is rechtgezet voordat het rapport wordt gemaakt.
+WIZARD_FIELDS.forEach(f => {
+  const el = fieldEl(f.key);
+  if (!el) return;
+  el.addEventListener("blur", () => {
+    const corrected = correctText(el.value, getLanguage());
+    if (corrected !== el.value) el.value = corrected;
+  });
+});
+
+// Enter gaat naar de volgende stap (zoals een formulier); Shift+Enter blijft
+// een nieuwe regel binnen het tekstveld invoegen, zoals de monteur gewend is.
+WIZARD_FIELDS.forEach(f => {
+  const el = fieldEl(f.key);
+  if (!el) return;
+  el.addEventListener("keydown", e => {
+    if (e.key !== "Enter" || e.shiftKey || e.isComposing) return;
+    e.preventDefault();
+    const panel = el.closest(".wizard-panel");
+    const nextBtn = panel && panel.querySelector("[data-next]");
+    if (nextBtn) nextBtn.click();
+  });
+});
+
+function setDefaultReportMeta() {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+  if ($("reportDate") && !$("reportDate").value) $("reportDate").value = local;
+
+  const loggedInName = sessionStorage.getItem("technicianName") || t("defaultTechnicianName");
+  if ($("technicianDisplay")) $("technicianDisplay").textContent = loggedInName;
+  updateWizardHead(wizardStep);
+}
+setDefaultReportMeta();
+
+let recognition = null;
+let isRecording = false;
+let activeMicField = null;
+const micBaseText = { reason: "", work: "", findings: "", next: "" };
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.lang = getLanguage() === "en" ? "en-US" : "nl-NL";
+  recognition.interimResults = true;
+  recognition.continuous = true;
+
+  recognition.onstart = () => setRecording(true);
+  recognition.onresult = (event) => {
+    if (!activeMicField) return;
+    let interim = "", finalPart = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalPart += transcript + " ";
+      else interim += transcript;
+    }
+    if (finalPart) micBaseText[activeMicField] = (micBaseText[activeMicField] + " " + finalPart).trim();
+    const el = fieldEl(activeMicField);
+    if (el) el.value = (micBaseText[activeMicField] + (interim ? " " + interim : "")).trim();
+  };
+  recognition.onerror = (event) => {
+    setRecording(false);
+    const messages = {
+      "not-allowed": t("errMicNotAllowed"),
+      "no-speech": t("errNoSpeech"),
+      "audio-capture": t("errAudioCapture")
+    };
+    showError(messages[event.error] || t("errSpeechGeneric"));
+  };
+  recognition.onend = () => setRecording(false);
+} else {
+  document.querySelectorAll(".mic-button-inline").forEach(b => { b.disabled = true; });
+  showError(t("errSpeechUnsupported"));
+}
+
+function setRecording(on) {
+  isRecording = on;
+  document.querySelectorAll(".mic-button-inline").forEach(btn => {
+    const isActive = btn.dataset.field === activeMicField;
+    btn.classList.toggle("recording", on && isActive);
+    btn.setAttribute("aria-pressed", String(on && isActive));
+    const label = btn.querySelector(".mic-btn-label");
+    if (label) label.textContent = (on && isActive) ? t("micStop") : t("micStart");
+  });
+  document.querySelectorAll("[data-recording-for]").forEach(el => {
+    el.classList.toggle("hidden", !(on && el.dataset.recordingFor === activeMicField));
+  });
+}
+
+document.querySelectorAll(".mic-button-inline").forEach(btn => {
+  btn.addEventListener("click", () => {
+    hideError();
+    if (!recognition) return;
+    const field = btn.dataset.field;
+    if (isRecording && activeMicField === field) {
+      recognition.stop();
+      return;
+    }
+    if (isRecording) { try { recognition.stop(); } catch {} }
+    activeMicField = field;
+    const el = fieldEl(field);
+    micBaseText[field] = el ? el.value.trim() : "";
+    try { recognition.start(); } catch { showError(t("errMicStartFailed")); }
+  });
+});
+
+document.querySelectorAll("[data-clear]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const field = btn.dataset.clear;
+    if (recognition && isRecording && activeMicField === field) {
+      try { recognition.stop(); } catch {}
+    }
+    const el = fieldEl(field);
+    if (el) el.value = "";
+    micBaseText[field] = "";
+  });
+});
+
+generateButton.addEventListener("click", async () => {
+  hideError();
+  copyNotice.classList.add("hidden");
+
+  const reasonVal = fieldValue("reason");
+  const workVal = fieldValue("work");
+  const findingsVal = fieldValue("findings");
+  const nextVal = fieldValue("next");
+
+  if (!reasonVal) { showWizardPanel(1); showError(t("wizardFieldRequired")); return; }
+  if (!workVal) { showWizardPanel(2); showError(t("wizardFieldRequired")); return; }
+  if (!findingsVal) { showWizardPanel(3); showError(t("wizardFieldRequired")); return; }
+
+  // De vier apart ingevoerde onderdelen worden samengevoegd tot één gelabelde
+  // tekst, zodat zowel het AI-model als de ingebouwde generator ze feilloos
+  // aan de juiste sectie kunnen toewijzen.
+  const combinedInput = getLanguage() === "en"
+    ? `Complaint: ${reasonVal}\nWork performed: ${workVal}\nFindings: ${findingsVal}\nNext steps: ${nextVal || "None mentioned."}`
+    : `Klacht: ${reasonVal}\nWerkzaamheden: ${workVal}\nBevindingen: ${findingsVal}\nVervolg: ${nextVal || "Niet vermeld."}`;
+
+  // Elk rapport wordt volledig opnieuw opgebouwd uit alleen de huidige invoer.
+  workDone.value = "";
+  findings.value = "";
+  nextSteps.value = "";
+  reportSection.classList.add("hidden");
+  fallbackNotice.classList.add("hidden");
+
+  isGenerating = true;
+  generateButton.disabled = true;
+  generateLabel.textContent = t("generateMaking");
+  cancelGenerateButton.classList.remove("hidden");
+  cancelGenerateButton.disabled = false;
+
+  // Na 6 seconden laten we weten dat het AI-model nog bezig is; na 10-15
+  // seconden schakelt buildDemoReport() zelf automatisch over op de snelle,
+  // ingebouwde rapportgenerator, dus lang wachten is niet meer nodig.
+  const slowNotice = setTimeout(() => {
+    generateLabel.textContent = t("generateSlow");
+  }, 6000);
+
+  // Laatste vangnet: buildDemoReport() begrenst het AI-model zelf al tot
+  // hooguit ~12 seconden en valt daarna terug op de ingebouwde generator, dus
+  // dit zou in de praktijk niet meer nodig moeten zijn — maar voorkomt dat de
+  // knop ooit oneindig "bezig" blijft als er toch iets vastloopt.
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(t("errReportGenericFail"))), 20000));
+
+  try {
+    const result = await Promise.race([buildDemoReport(combinedInput), timeout]);
+    workDone.value = result.work;
+    findings.value = result.findings;
+    nextSteps.value = result.next;
+    $("reviewed").checked = false;
+    fallbackNotice.classList.toggle("hidden", !result.usedFallback);
+    showReportStep();
+  } catch (error) {
+    showError(error?.message || t("errReportGenericFail"));
+  } finally {
+    clearTimeout(slowNotice);
+    isGenerating = false;
+    generateButton.disabled = false;
+    generateLabel.textContent = "✨ " + t("generateDefault");
+    cancelGenerateButton.classList.add("hidden");
+  }
+});
+
+cancelGenerateButton.addEventListener("click", () => {
+  cancelGenerateButton.disabled = true;
+  generateLabel.textContent = t("generateCancelling");
+  if (typeof window.cancelReportGeneration === "function") {
+    window.cancelReportGeneration();
+  }
+});
+
+
+function normalizeEnglishTechnicalInput(text) {
+  let t = String(text || "");
+
+  const replacements = [
+    [/\bannual maintenance\b/gi, "jaarlijkse onderhoudsbeurt"],
+    [/\bhalf[- ]yearly maintenance\b/gi, "halfjaarlijkse onderhoudsbeurt"],
+    [/\bperiodic maintenance\b/gi, "periodiek onderhoud"],
+    [/\bpreventive maintenance\b/gi, "preventief onderhoud"],
+    [/\bmaintenance\b/gi, "onderhoud"],
+    [/\binspection\b/gi, "inspectie"],
+    [/\binstallation\b/gi, "installatie"],
+    [/\bassembly\b/gi, "montage"],
+    [/\breplacement\b/gi, "vervanging"],
+    [/\brepair\b/gi, "reparatie"],
+    [/\bfault\b/gi, "storing"],
+    [/\bmalfunction\b/gi, "storing"],
+
+    [/\bcustomer\b/gi, "klant"],
+    [/\breported\b/gi, "meldde"],
+    [/\bcomplaint\b/gi, "klacht"],
+    [/\bproblem\b/gi, "probleem"],
+
+    [/\bchecked\b/gi, "gecontroleerd"],
+    [/\binspected\b/gi, "gecontroleerd"],
+    [/\bexamined\b/gi, "gecontroleerd"],
+    [/\btested\b/gi, "getest"],
+    [/\bmeasured\b/gi, "gemeten"],
+    [/\breplaced\b/gi, "vervangen"],
+    [/\bcleaned\b/gi, "schoongemaakt"],
+    [/\brepaired\b/gi, "gerepareerd"],
+    [/\bfixed\b/gi, "hersteld"],
+    [/\binstalled\b/gi, "gemonteerd"],
+    [/\bmounted\b/gi, "gemonteerd"],
+    [/\bconnected\b/gi, "aangesloten"],
+    [/\breconnected\b/gi, "opnieuw aangesloten"],
+    [/\bdisconnected\b/gi, "losgekoppeld"],
+    [/\bremoved\b/gi, "verwijderd"],
+    [/\bcalibrated\b/gi, "gekalibreerd"],
+    [/\badjusted\b/gi, "afgesteld"],
+    [/\brestarted\b/gi, "opnieuw opgestart"],
+    [/\bflushed\b/gi, "doorgespoeld"],
+    [/\bdrained\b/gi, "afgetapt"],
+    [/\brefilled\b/gi, "gevuld"],
+    [/\bvented\b/gi, "ontlucht"],
+    [/\btightened\b/gi, "vastgezet"],
+
+    [/\bworking properly\b/gi, "werkte naar behoren"],
+    [/\bworking correctly\b/gi, "werkte naar behoren"],
+    [/\bworking normally\b/gi, "werkte normaal"],
+    [/\bno issues found\b/gi, "geen bijzonderheden"],
+    [/\bno abnormalities found\b/gi, "geen afwijkingen"],
+    [/\bno further issues\b/gi, "geen verdere problemen"],
+    [/\bwithin specification\b/gi, "binnen de norm"],
+    [/\bwithin normal range\b/gi, "binnen de norm"],
+    [/\bwithin limits\b/gi, "binnen de norm"],
+    [/\bno leak\b/gi, "geen lekkage"],
+    [/\bno leakage\b/gi, "geen lekkage"],
+    [/\bstayed dry\b/gi, "droog gebleven"],
+    [/\bnormal signal\b/gi, "normaal signaal"],
+    [/\bresolved\b/gi, "opgelost"],
+
+    [/\bleakage\b/gi, "lekkage"],
+    [/\bleak\b/gi, "lekkage"],
+    [/\bshort circuit\b/gi, "kortsluiting"],
+    [/\boverloaded\b/gi, "overbelast"],
+    [/\bworn\b/gi, "versleten"],
+    [/\bdefective\b/gi, "defect"],
+    [/\bbroken\b/gi, "defect"],
+    [/\bburned\b/gi, "verbrand"],
+    [/\bburnt\b/gi, "verbrand"],
+    [/\bloose\b/gi, "los"],
+    [/\bblocked\b/gi, "geblokkeerd"],
+    [/\bclogged\b/gi, "verstopt"],
+    [/\boverheating\b/gi, "oververhitting"],
+    [/\bstrange noise\b/gi, "vreemd geluid"],
+    [/\bticking noise\b/gi, "tikkend geluid"],
+    [/\bnoise\b/gi, "geluid"],
+    [/\bvibration\b/gi, "trilling"],
+    [/\bnot working\b/gi, "werkte niet"],
+    [/\bstopped working\b/gi, "werkte niet"],
+
+    [/\bcirculation pump\b/gi, "circulatiepomp"],
+    [/\bpump\b/gi, "pomp"],
+    [/\bmotor\b/gi, "motor"],
+    [/\bbearing\b/gi, "lager"],
+    [/\bheating boiler\b/gi, "ketel"],
+    [/\bfurnace\b/gi, "ketel"],
+    [/\bboiler\b/gi, "boiler"],
+    [/\bradiator\b/gi, "radiator"],
+    [/\bthermostat\b/gi, "thermostaat"],
+    [/\bventilation unit\b/gi, "ventilatie-unit"],
+    [/\bair conditioning unit\b/gi, "airco-unit"],
+    [/\bair conditioner\b/gi, "airco-unit"],
+    [/\bfilters\b/gi, "filters"],
+    [/\bfilter\b/gi, "filter"],
+    [/\bheat exchanger\b/gi, "warmtewisselaar"],
+    [/\bcondenser\b/gi, "condensor"],
+    [/\bsmoke detector\b/gi, "rookmelder"],
+    [/\bsmoke alarm\b/gi, "rookmelder"],
+    [/\bbattery\b/gi, "batterij"],
+    [/\btemperature sensor\b/gi, "temperatuursensor"],
+    [/\bco2 sensor\b/gi, "CO2-sensor"],
+    [/\bsensor\b/gi, "sensor"],
+    [/\bwiring\b/gi, "bedrading"],
+    [/\bwire\b/gi, "draad"],
+    [/\bcable\b/gi, "kabel"],
+    [/\bconnector\b/gi, "connector"],
+    [/\boutlet\b/gi, "stopcontact"],
+    [/\bsocket\b/gi, "stopcontact"],
+    [/\bcircuit breaker\b/gi, "groep"],
+    [/\belectrical panel\b/gi, "meterkast"],
+    [/\bfuse box\b/gi, "meterkast"],
+    [/\bmain switch\b/gi, "hoofdschakelaar"],
+    [/\bpiping\b/gi, "leidingwerk"],
+    [/\bpipe\b/gi, "leiding"],
+    [/\bhose\b/gi, "slang"],
+    [/\bcoupling\b/gi, "koppelstuk"],
+    [/\bwashing machine connection\b/gi, "wasmachine-aansluiting"],
+    [/\bconnection\b/gi, "aansluiting"],
+    [/\bdrain\b/gi, "afvoer"],
+    [/\bsafety valve\b/gi, "veiligheidsklep"],
+    [/\bvalve\b/gi, "klep"],
+    [/\binverter\b/gi, "omvormer"],
+    [/\bgrounding\b/gi, "aarding"],
+    [/\bearthing\b/gi, "aarding"],
+    [/\brelay\b/gi, "relais"],
+
+    [/\bflue gas measurement\b/gi, "rookgasmeting"],
+    [/\bflue gas\b/gi, "rookgas"],
+    [/\brefrigerant pressure\b/gi, "koelvloeistofdruk"],
+    [/\bpressure tested\b/gi, "op druk getest"],
+    [/\bunder pressure\b/gi, "onder druk"],
+    [/\btest button\b/gi, "testknop"],
+    [/\btemperature\b/gi, "temperatuur"],
+
+    [/\bnot sure\b/gi, "twijfel"],
+    [/\buncertain\b/gi, "twijfel"],
+    [/\bpossibly\b/gi, "mogelijk"],
+    [/\bmaybe\b/gi, "mogelijk"],
+    [/\bif it happens again\b/gi, "als het terugkomt"],
+    [/\bif the issue returns\b/gi, "als de klacht terugkeert"],
+    [/\bcontact us again\b/gi, "opnieuw contact opnemen"],
+    [/\bnext visit\b/gi, "volgende afspraak"],
+    [/\bfollow-up\b/gi, "vervolgcontrole"]
+  ];
+
+  for (const [from, to] of replacements) {
+    t = t.replace(from, to);
+  }
+
+  return t;
+}
+
+// Probeert eerst het lokale AI-model (vloeiendere, professionelere tekst),
+// maar wacht daar maar een beperkte tijd op. Lukt dat niet op tijd — model
+// nog niet geladen, te traag op dit apparaat, of een fout — dan valt de app
+// automatisch terug op de deterministische rapportgenerator hierboven, zodat
+// er altijd een rapport uitkomt.
+const AI_ATTEMPT_TIMEOUT_MS = 12000;
+
+async function buildDemoReport(input) {
+  let report = null;
+  let usedFallback = false;
+
+  if (typeof window.generateServiceReportAI === "function") {
+    try {
+      const aiTimeout = new Promise((_, reject) => {
+        setTimeout(() => {
+          if (typeof window.cancelReportGeneration === "function") window.cancelReportGeneration();
+          reject(new Error(t("errAiTimeout")));
+        }, AI_ATTEMPT_TIMEOUT_MS);
+      });
+      report = await Promise.race([window.generateServiceReportAI(input), aiTimeout]);
+    } catch (aiError) {
+      console.warn("AI-rapport mislukt, gebruik ingebouwde rapportgenerator in plaats daarvan:", aiError);
+      report = null;
+    }
+  }
+
+  if (!report) {
+    usedFallback = true;
+    report = buildRuleBasedReport(input);
+  }
+
+  // Corrigeer ook de uiteindelijke rapporttekst zelf (titel + alle bullets),
+  // niet alleen wat de monteur intypte. Dit is vooral nodig voor AI-tekst:
+  // het taalmodel neemt soms losse zinsdelen vrijwel letterlijk over, met
+  // dezelfde spel-, vervoegings- en woordkeuzefouten als de brontekst.
+  const lang = getLanguage();
+  if (report.title) report.title = correctText(report.title, lang);
+  ["work", "findings", "next_steps"].forEach(key => {
+    if (Array.isArray(report[key])) {
+      report[key] = report[key].map(item => correctText(item, lang));
+    }
+  });
+
+  if (report.title) {
+    window.lastGeneratedReportTitle = report.title;
+  }
+
+  const bulletText = (items, fallback) => {
+    const clean = Array.isArray(items)
+      ? items.map(x => String(x || "").trim()).filter(Boolean)
+      : [];
+    return clean.length ? "• " + clean.join("\n• ") : "• " + fallback;
+  };
+
+  return {
+    work: bulletText(report.work, t("fallbackWorkEmpty")),
+    findings: bulletText(report.findings, t("fallbackFindingsEmpty")),
+    next: bulletText(report.next_steps, t("fallbackNextEmpty")),
+    usedFallback
+  };
+}
+
+$("editButton").addEventListener("click", () => workDone.focus());
+
+$("copyButton").addEventListener("click", async () => {
+  if (!$("reviewed").checked) {
+    showError(t("errReviewFirstCopy"));
+    return;
+  }
+
+  const report = `${t("workDoneLabel")}
+${workDone.value}
+
+${t("findingsLabel")}
+${findings.value}
+
+${t("nextStepsLabel")}
+${nextSteps.value}`;
+
+  try {
+    await navigator.clipboard.writeText(report);
+    copyNotice.classList.remove("hidden");
+    hideError();
+  } catch {
+    showError(t("errCopyFailed"));
+  }
+});
+
+
+$("pdfButton").addEventListener("click", () => {
+  if (!$("reviewed").checked) {
+    showError(t("errReviewFirstPdf"));
+    return;
+  }
+
+  const technician = sessionStorage.getItem("technicianName") || t("defaultTechnicianName");
+
+  hideError();
+
+  const sections = [
+    [t("pdfSectionWork"), workDone.value.trim()],
+    [t("pdfSectionFindings"), findings.value.trim()],
+    [t("pdfSectionNext"), nextSteps.value.trim()]
+  ];
+
+  const dateValue = $("reportDate").value || new Date().toISOString().slice(0,10);
+  const [yy, mm, dd] = dateValue.split("-");
+  const displayDate = getLanguage() === "en" ? `${mm}/${dd}/${yy}` : `${dd}-${mm}-${yy}`;
+
+  const title = window.lastGeneratedReportTitle || createJobTitle(workDone.value, findings.value);
+  const reportRef = buildReportRef(dateValue, technician, title);
+  const pdfBlob = buildReportPdf(sections, displayDate, technician, title, reportRef);
+  const url = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${safeFileName(title)}_${displayDate}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+});
+
+function createJobTitle(workText, findingText) {
+  const text = `${workText} ${findingText}`.toLowerCase();
+
+  if (getLanguage() === "en") {
+    let action = "Service";
+    if (/installed|mounted|assembly|assembled/.test(text)) action = "Installation";
+    else if (/replaced|replacement/.test(text)) action = "Replacement";
+    else if (/repaired|fixed|repair|resolved/.test(text)) action = "Repair";
+    else if (/maintenance|cleaned|adjusted/.test(text)) action = "Maintenance";
+    else if (/checked|inspected|inspection|tested/.test(text)) action = "Inspection";
+
+    let object = "";
+    const objects = [
+      ["pump", "pump"], ["motor", "motor"], ["boiler", "boiler"], ["heating", "heating system"],
+      ["installation", "installation"], ["machine", "machine"], ["pipe", "pipe"],
+      ["fan", "fan"], ["bearing", "bearing"], ["wiring", "wiring"],
+      ["cable", "cable"], ["sensor", "sensor"], ["valve", "valve"]
+    ];
+    for (const [key, label] of objects) {
+      if (text.includes(key)) { object = label; break; }
+    }
+
+    return object ? `${action} ${object}` : `${action} report`;
+  }
+
+  let action = "Service";
+  if (/gemonteerd|montage|geplaatst|installeren|geinstalleerd|geïnstalleerd/.test(text)) action = "Montage";
+  else if (/vervangen|vervanging/.test(text)) action = "Vervanging";
+  else if (/gerepareerd|hersteld|reparatie|opgelost/.test(text)) action = "Reparatie";
+  else if (/onderhoud|schoongemaakt|afgesteld/.test(text)) action = "Onderhoud";
+  else if (/gecontroleerd|controle|geinspecteerd|geïnspecteerd|getest/.test(text)) action = "Controle";
+
+  let object = "";
+  const objects = [
+    ["pomp", "pomp"], ["motor", "motor"], ["ketel", "ketel"], ["cv", "cv-installatie"],
+    ["installatie", "installatie"], ["machine", "machine"], ["leiding", "leiding"],
+    ["ventilator", "ventilator"], ["lager", "lager"], ["bedrading", "bedrading"],
+    ["kabel", "kabel"], ["sensor", "sensor"], ["klep", "klep"]
+  ];
+  for (const [key, label] of objects) {
+    if (text.includes(key)) { object = label; break; }
+  }
+
+  return object ? `${action} ${object}` : `${action} servicerapport`;
+}
+
+function safeFileName(name) {
+  return name
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, "_")
+    .trim();
+}
+
+// Stabiel, deterministisch rapportnummer (geen willekeur) zodat hetzelfde
+// rapport altijd hetzelfde nummer krijgt — geeft de PDF een "echt" document-
+// achtig kenmerk in plaats van een kaal gegenereerd uiterlijk.
+function buildReportRef(dateValue, technician, title) {
+  const basis = `${dateValue}|${technician}|${title}`;
+  let hash = 0;
+  for (let i = 0; i < basis.length; i++) {
+    hash = (hash * 31 + basis.charCodeAt(i)) >>> 0;
+  }
+  const suffix = String(hash % 10000).padStart(4, "0");
+  return `SR-${String(dateValue || "").replace(/-/g, "")}-${suffix}`;
+}
+
+function buildReportPdf(sections, date, technician, reportTitle, reportRef) {
+  // Kleine ingebouwde PDF-generator zodat het ook lokaal/offline werkt (geen
+  // externe PDF-bibliotheek nodig) — vormgegeven als een rustig, zakelijk
+  // briefpapier-rapport in plaats van een kleurrijke "gegenereerde" opmaak.
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const left = 54;
+  const right = 54;
+  const bottom = 60;
+  const bodySize = 10.2;
+  const headingSize = 11.5;
+  const bodyLeading = 14.5;
+  const contentWidth = pageWidth - left - right;
+
+  // Zelfde kleurenpalet als de app zelf (--ink / --text / --muted / --border /
+  // --accent uit de stylesheet), zodat het PDF-rapport oogt als een export
+  // van de app in plaats van een los ontwerp.
+  const INK = [0.086, 0.125, 0.102];       // --ink #16201a
+  const TEXT_DARK = [0.102, 0.133, 0.110]; // --text #1a221c
+  const MUTED = [0.369, 0.420, 0.380];     // --muted #5e6b61
+  const LINE = [0.788, 0.816, 0.765];      // --border #c9d0c3
+  const ACCENT = [0.059, 0.420, 0.322];    // --accent #0f6b52
+  const ACCENT_DARK = [0.039, 0.310, 0.235]; // --accent-dark #0a4f3c
+  const WHITE = [1, 1, 1];
+
+  function pdfSafe(text) {
+    return String(text)
+      .replace(/[•]/g, "-")
+      .replace(/[“”„]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[–—]/g, "-")
+      .replace(/€/g, "EUR")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^\x20-\x7E\n]/g, "?")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)");
+  }
+
+  function wrapItem(text, maxChars) {
+    const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return [""];
+    const lines = [];
+    let line = "";
+    words.forEach(word => {
+      const candidate = line ? line + " " + word : word;
+      if (candidate.length > maxChars && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  // Zet een sectietekst (regels gescheiden door \n, opsommingen met "• ")
+  // om in losse te tekenen regels, met een vlag of het een opsompunt is
+  // (voor een streepje en hangende inspringing).
+  function wrapSection(body, maxChars) {
+    const output = [];
+    String(body || "").split(/\n/).forEach(paragraph => {
+      const trimmed = paragraph.trim();
+      if (!trimmed) { output.push({ text: "", indent: false, dot: false }); return; }
+      const isBullet = /^[•-]\s*/.test(trimmed);
+      const content = trimmed.replace(/^[•-]\s*/, "");
+      wrapItem(content, maxChars).forEach((line, idx) => {
+        output.push({ text: line, indent: isBullet, dot: isBullet && idx === 0 });
+      });
+    });
+    return output;
+  }
+
+  const pages = [];
+  let commands = [];
+  let y = 0;
+  let pageNumber = 1;
+  const TOTAL_TOKEN = "@@TOTALPAGES@@"; // ASCII placeholder, vervangen zodra het totaal bekend is
+
+  function setFill(color) {
+    commands.push(`${color[0]} ${color[1]} ${color[2]} rg`);
+  }
+
+  function fillRect(x, yPos, w, h, color) {
+    setFill(color);
+    commands.push(`${x} ${yPos} ${w} ${h} re f`);
+  }
+
+  function hairline(x, yPos, w, color = LINE, weight = 0.75) {
+    fillRect(x, yPos, w, weight, color);
+  }
+
+  // "mono" tekent met het monospace lettertype (F3), net als de kleine
+  // labels/badges/meta-teksten in de app (.eyebrow, .badge, footer strong, …).
+  function textLine(text, x, yPos, size = bodySize, bold = false, color = TEXT_DARK, mono = false) {
+    const font = mono ? "F3" : (bold ? "F2" : "F1");
+    const charWidth = mono ? size * 0.60 : size * (bold ? 0.60 : 0.55);
+    commands.push(
+      `BT /${font} ${size} Tf ${color[0]} ${color[1]} ${color[2]} rg ${x} ${yPos} Td (${pdfSafe(text)}) Tj ET`
+    );
+    return pdfSafe(text).length * charWidth;
+  }
+
+  function textRight(text, rightEdge, yPos, size = bodySize, bold = false, color = MUTED, mono = false) {
+    const charWidth = mono ? size * 0.60 : size * (bold ? 0.60 : 0.55); // grove benadering
+    const width = pdfSafe(text).length * charWidth;
+    textLine(text, rightEdge - width, yPos, size, bold, color, mono);
+  }
+
+  // Dezelfde dikke inkt-balk bovenaan als de ".card"/".wizard-panel"-kaarten
+  // in de app (border-top: 3px solid var(--ink)), op elke pagina.
+  function drawTopBar() {
+    fillRect(0, pageHeight - 3, pageWidth, 3, INK);
+  }
+
+  function drawFooter() {
+    hairline(left, 38, contentWidth, LINE);
+    const brandWidth = textLine(t("pdfFooterBrand"), left, 24, 8, true, TEXT_DARK, true);
+    hairline(left + brandWidth + 8, 21, 1, LINE, 11);
+    textLine(t("pdfFooterTagline"), left + brandWidth + 18, 24, 8, false, MUTED);
+    textRight(`${t("pdfPagePrefix")}${pageNumber}${t("pdfPageOf")}${TOTAL_TOKEN}`, pageWidth - right, 24, 8, false, MUTED, true);
+  }
+
+  // Zakelijke briefpapier-kop, alleen op de eerste pagina: kleine logo-chip,
+  // rapportnummer en datum rechts uitgelijnd, daaronder de titel met één
+  // dunne accentregel — in dezelfde stijl (inkt-balk, monospace meta-labels,
+  // groen accent) als het app-scherm zelf.
+  function drawMainHeader() {
+    drawTopBar();
+    const topY = pageHeight - 52;
+    fillRect(left, topY - 4, 19, 19, INK);
+    textLine("SR", left + 4, topY + 2, 8.5, true, WHITE, true);
+    textLine(t("pdfEyebrow"), left + 27, topY + 6, 8, true, MUTED, true);
+
+    textRight(`${t("pdfReportNoPrefix")}${reportRef}`, pageWidth - right, topY + 6, 8.5, false, MUTED, true);
+    textRight(`${t("pdfDatePrefix")}${date}`, pageWidth - right, topY - 5, 8.5, false, MUTED, true);
+
+    y = topY - 22;
+    hairline(left, y, contentWidth, LINE);
+    y -= 30;
+
+    textLine(t("pdfReportLabel"), left, y, 8, true, MUTED, true);
+    y -= 20;
+    textLine(reportTitle, left, y, 19, true, INK);
+    y -= 11;
+    fillRect(left, y - 4, 42, 2, ACCENT);
+    y -= 26;
+
+    // Metadata-kader: monteur en datum naast elkaar, als op een echt formulier.
+    const boxH = 42;
+    const boxY = y - boxH;
+    const colW = contentWidth / 2;
+    hairline(left, boxY, contentWidth, LINE, 1);
+    hairline(left, boxY, 1, LINE, boxH);
+    hairline(left + colW, boxY, 1, LINE, boxH);
+    hairline(left + contentWidth - 1, boxY, 1, LINE, boxH);
+    hairline(left, boxY + boxH, contentWidth, LINE, 1);
+
+    textLine(t("technicianLabel").toUpperCase(), left + 14, boxY + boxH - 16, 7.5, true, MUTED, true);
+    textLine(technician, left + 14, boxY + 12, 12, true, INK);
+    textLine(t("reportDateLabel").toUpperCase(), left + colW + 14, boxY + boxH - 16, 7.5, true, MUTED, true);
+    textLine(date, left + colW + 14, boxY + 12, 12, true, INK);
+
+    y = boxY - 30;
+  }
+
+  // Kleine, compacte koptekst op vervolgpagina's — enkel een haarlijn en
+  // grijze context, zonder zware vulling.
+  function drawContinuationHeader() {
+    drawTopBar();
+    const topY = pageHeight - 46;
+    textLine(reportTitle, left, topY, 9.5, true, INK);
+    textRight(`${t("pdfReportNoPrefix")}${reportRef}`, pageWidth - right, topY, 8, false, MUTED, true);
+    hairline(left, topY - 10, contentWidth, LINE);
+    y = topY - 32;
+  }
+
+  function newPage() {
+    drawFooter();
+    pages.push(commands.join("\n"));
+    commands = [];
+    pageNumber += 1;
+    drawContinuationHeader();
+  }
+
+  drawMainHeader();
+
+  sections.forEach(([heading, body]) => {
+    if (y < bottom + 90) newPage();
+
+    textLine(heading, left, y, headingSize, true, INK);
+    y -= 7;
+    hairline(left, y, contentWidth, LINE);
+    y -= 17;
+
+    const items = wrapSection(body || t("pdfNotFilled"), 92);
+    items.forEach(item => {
+      if (y < bottom) {
+        newPage();
+        textLine(heading + t("pdfContinuationSuffix"), left, y, headingSize - 1, true, INK);
+        y -= 19;
+      }
+      const textX = left + (item.indent ? 14 : 0);
+      if (item.dot) {
+        textLine("-", left + 1, y, bodySize, true, MUTED);
+      }
+      textLine(item.text || " ", textX, y, bodySize, false, TEXT_DARK);
+      y -= bodyLeading;
+    });
+
+    y -= 13;
+  });
+
+  if (y < bottom + 95) newPage();
+  textLine(t("pdfReviewHeading"), left, y, headingSize, true, INK);
+  y -= 7;
+  hairline(left, y, contentWidth, LINE);
+  y -= 17;
+  textLine(t("pdfReviewText"), left, y, bodySize, false, TEXT_DARK);
+  y -= 42;
+
+  // Handtekeningregel blijft open (die zet de monteur er met de hand bij),
+  // maar de datum staat al bovenin het rapport, dus die wordt hier automatisch
+  // ingevuld op de lijn in plaats van opnieuw een lege regel te tonen.
+  const sigWidth = 190;
+  const dateColX = left + sigWidth + 40;
+  const dateColW = 130;
+  hairline(left, y, sigWidth, LINE, 1);
+  textLine(t("pdfSignatureLabel").toUpperCase(), left, y - 12, 7.5, true, MUTED, true);
+  hairline(dateColX, y, dateColW, LINE, 1);
+  textLine(date, dateColX, y + 3, 11, true, INK);
+  textLine(t("pdfSignatureDateLabel").toUpperCase(), dateColX, y - 12, 7.5, true, MUTED, true);
+
+  drawFooter();
+  pages.push(commands.join("\n"));
+
+  // Nu het totaal aantal pagina's bekend is, de placeholder in elke
+  // voettekst vervangen door het echte totaal.
+  const totalPages = pages.length;
+  for (let i = 0; i < pages.length; i++) {
+    pages[i] = pages[i].split(TOTAL_TOKEN).join(String(totalPages));
+  }
+
+  const objects = [];
+  const addObj = content => {
+    objects.push(content);
+    return objects.length;
+  };
+
+  const font1 = addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const font2 = addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  // Monospace lettertype voor de kleine labels/badges/meta-tekst, net als
+  // var(--mono) op .eyebrow/.badge/footer strong in de app zelf.
+  const font3 = addObj("<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold >>");
+
+  const pageObjNums = [];
+  const contentObjNums = [];
+
+  pages.forEach(content => {
+    const contentNum = addObj(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+    contentObjNums.push(contentNum);
+    pageObjNums.push(null);
+  });
+
+  const pagesObjNum = objects.length + pages.length + 1;
+
+  pages.forEach((_, i) => {
+    const pageContentNum = contentObjNums[i];
+    const pageNum = addObj(
+      `<< /Type /Page /Parent ${pagesObjNum} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] ` +
+      `/Resources << /Font << /F1 ${font1} 0 R /F2 ${font2} 0 R /F3 ${font3} 0 R >> >> ` +
+      `/Contents ${pageContentNum} 0 R >>`
+    );
+    pageObjNums[i] = pageNum;
+  });
+
+  const kids = pageObjNums.map(n => `${n} 0 R`).join(" ");
+  // Because addObj above appended page objects, calculate actual Pages object now.
+  const actualPagesObj = addObj(`<< /Type /Pages /Kids [${kids}] /Count ${pageObjNums.length} >>`);
+  const catalogObj = addObj(`<< /Type /Catalog /Pages ${actualPagesObj} 0 R >>`);
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+
+  objects.forEach((obj, i) => {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${obj}\nendobj\n`;
+  });
+
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += "0000000000 65535 f \n";
+  for (let i = 1; i <= objects.length; i++) {
+    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  }
+
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogObj} 0 R >>\n`;
+  pdf += `startxref\n${xrefPos}\n%%EOF`;
+
+  return new Blob([pdf], { type: "application/pdf" });
+}
+
+
+$("newButton").addEventListener("click", () => {
+  if (recognition && isRecording) {
+    try { recognition.stop(); } catch {}
+  }
+
+  // Volledige reset voor een nieuwe klus.
+  WIZARD_FIELDS.forEach(f => {
+    const el = fieldEl(f.key);
+    if (el) el.value = "";
+    micBaseText[f.key] = "";
+  });
+  activeMicField = null;
+  workDone.value = "";
+  findings.value = "";
+  nextSteps.value = "";
+  window.lastGeneratedReportTitle = "";
+
+  // Oude browser-spraakresultaten mogen niet naar de volgende klus lekken.
+  if (recognition) {
+    try {
+      recognition.abort();
+    } catch {}
+  }
+  $("reviewed").checked = false;
+
+  reportSection.classList.add("hidden");
+  fallbackNotice.classList.add("hidden");
+  copyNotice.classList.add("hidden");
+  hideError();
+
+  if ($("reportDate")) $("reportDate").value = "";
+  setDefaultReportMeta();
+
+  showWizardPanel(1);
+});
+
+function showError(message) {
+  errorBox.textContent = message;
+  errorBox.classList.remove("hidden");
+}
+function hideError() {
+  errorBox.classList.add("hidden");
+  errorBox.textContent = "";
+}
+
+// Vertaalt direct alle zichtbare tekst naar de opgeslagen taalkeuze (of
+// Nederlands als er nog geen keuze is gemaakt) — al vóór het inloggen.
+applyLanguage();
+
+</script>
+
+<script type="module">
+import {
+  pipeline,
+  env,
+  InterruptableStoppingCriteria
+} from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+
+const MODEL_ID = "onnx-community/Qwen2.5-0.5B-Instruct";
+
+let generator = null;
+let loadingPromise = null;
+let usingWebGPU = false;
+
+// Laat generatie écht afbreken als het te lang duurt, in plaats van te
+// vertrouwen op een externe timer (die niet afgaat zolang de browser druk
+// bezig is met rekenen). Deze stopcriteria wordt in elke generatiestap
+// gecontroleerd door de bibliotheek zelf.
+const stoppingCriteria = new InterruptableStoppingCriteria();
+let generationCancelled = false;
+let generationCancelledByUser = false;
+
+window.cancelReportGeneration = function () {
+  generationCancelled = true;
+  generationCancelledByUser = true;
+  stoppingCriteria.interrupt();
+};
+
+const systemPrompt = `
+Je bent een professionele Nederlandse rapportage-assistent voor technische servicemonteurs.
+
+Zet vrije gesproken of getypte werkaantekeningen om in een kort, feitelijk en professioneel servicerapport.
+
+REGELS:
+- Invoer kan Nederlands of Engels zijn. Uitvoer is altijd Nederlands.
+- Gebruik ALLEEN feiten die uit de huidige invoer volgen.
+- Verzin nooit oorzaken, diagnoses, onderdelen, metingen of verrichte handelingen.
+- Kopieer spreektaal niet letterlijk; herschrijf grammaticaal correct en zakelijk.
+- Laat relevante werkzaamheden en bevindingen niet weg.
+- Behandel meerdere problemen tijdens één bezoek allemaal.
+- Behoud twijfel en onzekerheid. Maak een mogelijke oorzaak nooit tot een feit.
+- Als een klacht tijdens het bezoek niet reproduceerbaar is, vermeld dat.
+- Benoem concrete componenten zoals lager, koppelstuk, rookmelder, kabel of hoofdschakelaar.
+- Een geslaagde test na reparatie hoort bij de bevindingen/resultaten.
+- Vermijd dubbele informatie tussen de drie onderdelen.
+- Vervolgstappen moeten logisch volgen uit de invoer.
+- Als geen vervolg is genoemd:
+  * gepland onderhoud -> volgende controle volgens onderhoudsschema;
+  * opgelost probleem -> monitoren en opnieuw melden als de klacht terugkeert;
+  * onzeker probleem -> gerichte vervolgcontrole als de klacht terugkeert;
+  * expliciet geen actie nodig -> vermeld dat geen verdere actie nodig is.
+- Formuleer korte, zelfstandige zinnen.
+
+Geef ALLEEN dit formaat terug, zonder uitleg ervoor of erna:
+
+TITEL: korte titel van 2 tot 5 woorden, bijvoorbeeld "Onderhoud ventilatie-unit", "Reparatie leiding" of "Controle meterkast"
+
+WERKZAAMHEDEN:
+- zin
+- zin
+
+BEVINDINGEN:
+- zin
+- zin
+
+VERVOLGSTAPPEN:
+- zin
+- zin
+
+Voorbeeld:
+Invoer: "Klant had waterlekkage onder de wastafel. Koppelstuk dichtte niet goed af. Koppelstuk vervangen, systeem onder druk getest, geen lekkage meer."
+Uitvoer:
+TITEL: Reparatie leiding
+WERKZAAMHEDEN:
+- Het defecte koppelstuk is vervangen.
+- Het systeem is opnieuw onder druk gezet en getest.
+BEVINDINGEN:
+- Het koppelstuk dichtte niet meer correct af.
+- Na de reparatie is geen lekkage meer vastgesteld.
+VERVOLGSTAPPEN:
+- Controleer tijdens gebruik of de aansluiting droog blijft.
+
+Voorbeeld:
+Invoer: "Klant meldde tikkend geluid uit de meterkast. Tijdens bezoek niet hoorbaar. Hoofdschakelaar en groepen gecontroleerd, temperatuur gemeten, niets afwijkends. Mogelijk uitzetting bekabeling of iets los. Klant maakt opname als het terugkomt."
+Uitvoer:
+TITEL: Controle meterkast
+WERKZAAMHEDEN:
+- De hoofdschakelaar en groepen zijn gecontroleerd.
+- De temperatuur bij de aansluitingen is gemeten.
+BEVINDINGEN:
+- Het gemelde geluid was tijdens het bezoek niet waarneembaar.
+- Er zijn geen afwijkingen vastgesteld.
+- De exacte oorzaak is niet met zekerheid vastgesteld.
+- Thermische uitzetting of een losse verbinding zijn mogelijke oorzaken.
+VERVOLGSTAPPEN:
+- De klant legt het geluid vast als het opnieuw optreedt.
+- Bij terugkeer van de klacht wordt een gerichte vervolgcontrole uitgevoerd.
+
+Voorbeeld:
+Invoer: "Annual maintenance of ventilation unit. Replaced dirty filters, cleaned rotor, checked bearings and tested the unit. Everything working normally."
+Uitvoer:
+TITEL: Onderhoud ventilatie-unit
+WERKZAAMHEDEN:
+- De filters zijn vervangen.
+- De rotor is gereinigd.
+- De lagers zijn gecontroleerd.
+- De ventilatie-unit is getest.
+BEVINDINGEN:
+- De filters waren vervuild.
+- De installatie functioneert na het onderhoud normaal.
+VERVOLGSTAPPEN:
+- Voer de volgende onderhoudsbeurt uit volgens het onderhoudsschema.
+`;
+
+const systemPromptEn = `
+You are a professional reporting assistant for technical service engineers.
+
+Turn free-form spoken or typed job notes into a short, factual, professional service report.
+
+RULES:
+- Input can be in Dutch or English. Output is always in English.
+- Use ONLY facts that follow from the current input.
+- Never invent causes, diagnoses, parts, measurements, or actions that were not mentioned.
+- Do not copy spoken phrasing literally; rewrite it grammatically correct and businesslike.
+- Do not leave out relevant work performed or findings.
+- If multiple issues were handled during one visit, cover all of them.
+- Preserve doubt and uncertainty. Never turn a possible cause into a stated fact.
+- If a complaint could not be reproduced during the visit, mention that.
+- Name concrete components such as bearing, coupling, smoke detector, cable, or main switch.
+- A successful test after a repair belongs in the findings/results.
+- Avoid duplicate information between the three sections.
+- Next steps must follow logically from the input.
+- If no next step was mentioned:
+  * scheduled maintenance -> next check according to the maintenance schedule;
+  * resolved issue -> monitor and report again if the complaint returns;
+  * uncertain issue -> targeted follow-up check if the complaint returns;
+  * explicitly no action needed -> state that no further action is needed.
+- Write short, self-contained sentences.
+
+Return ONLY this format, with no explanation before or after:
+
+TITLE: short title of 2 to 5 words, for example "Ventilation unit maintenance", "Pipe repair" or "Fuse box inspection"
+
+WORK PERFORMED:
+- sentence
+- sentence
+
+FINDINGS:
+- sentence
+- sentence
+
+NEXT STEPS:
+- sentence
+- sentence
+
+Example:
+Input: "Customer had a water leak under the sink. The coupling was not sealing properly. Replaced the coupling, pressure-tested the system, no more leaks."
+Output:
+TITLE: Pipe repair
+WORK PERFORMED:
+- The faulty coupling was replaced.
+- The system was pressurized and tested again.
+FINDINGS:
+- The coupling was no longer sealing correctly.
+- No further leaks were found after the repair.
+NEXT STEPS:
+- Check during use that the connection stays dry.
+
+Example:
+Input: "Customer reported a ticking noise from the fuse box. Not audible during the visit. Checked the main switch and circuits, measured temperature, nothing abnormal. Possibly thermal expansion of wiring or something loose. Customer will record it if it happens again."
+Output:
+TITLE: Fuse box inspection
+WORK PERFORMED:
+- The main switch and circuits were checked.
+- The temperature at the connections was measured.
+FINDINGS:
+- The reported noise was not audible during the visit.
+- No abnormalities were found.
+- The exact cause could not be determined with certainty.
+- Thermal expansion or a loose connection are possible causes.
+NEXT STEPS:
+- The customer will record the noise if it happens again.
+- A targeted follow-up check will be carried out if the complaint returns.
+
+Example:
+Input: "Jaarlijkse onderhoudsbeurt van de ventilatie-unit. Vuile filters vervangen, rotor schoongemaakt, lagers gecontroleerd en de unit getest. Alles werkt normaal."
+Output:
+TITLE: Ventilation unit maintenance
+WORK PERFORMED:
+- The filters were replaced.
+- The rotor was cleaned.
+- The bearings were checked.
+- The ventilation unit was tested.
+FINDINGS:
+- The filters were dirty.
+- The installation functions normally after maintenance.
+NEXT STEPS:
+- Carry out the next maintenance visit according to the maintenance schedule.
+`;
+
+function setStatus(state, text, detail, percent) {
+  window.modelStatusTouched = true;
+  const targets = [
+    [
+      document.getElementById("modelStatusText"),
+      document.getElementById("modelStatusDetail"),
+      document.getElementById("modelStatusDot"),
+      document.getElementById("modelProgressBar")
+    ],
+    [
+      document.getElementById("loginModelStatusText"),
+      document.getElementById("loginModelStatusDetail"),
+      document.getElementById("loginModelStatusDot"),
+      document.getElementById("loginModelProgressBar")
+    ]
+  ];
+
+  targets.forEach(([statusText, statusDetail, dot, bar]) => {
+    if (statusText) statusText.textContent = text;
+    if (statusDetail && detail) statusDetail.textContent = detail;
+    if (bar && Number.isFinite(percent)) {
+      bar.style.width = Math.max(0, Math.min(100, percent)) + "%";
+    }
+    if (dot) {
+      dot.classList.remove("loading", "ready", "error");
+      if (state) dot.classList.add(state);
+    }
+  });
+
+  // Compacte AI-indicator in de wizard-kop (zichtbaar op elke stap, niet
+  // alleen stap 5), zodat je tijdens het invullen al kunt zien dat de
+  // rapportmotor op de achtergrond klaarstaat tegen de tijd dat je op
+  // "Maak rapport" klikt.
+  const metaAiDot = document.getElementById("wizardMetaAiDot");
+  const metaAiWrap = document.getElementById("wizardMetaAi");
+  if (metaAiDot) {
+    metaAiDot.classList.remove("loading", "ready", "error");
+    if (state) metaAiDot.classList.add(state);
+  }
+  if (metaAiWrap) metaAiWrap.title = detail ? `${text} — ${detail}` : text;
+
+  // Laat de klassieke UI (generate-knop e.d.) meebewegen met de laadstatus.
+  window.dispatchEvent(new CustomEvent("reportEngineStatus", { detail: { state, text, percent } }));
+}
+
+function formatMB(bytes) {
+  if (!Number.isFinite(bytes)) return "";
+  return (bytes / (1024 * 1024)).toFixed(0) + " MB";
+}
+
+function progressCallback(data) {
+  let pct = null;
+  if (typeof data?.progress === "number") {
+    pct = data.progress <= 1 ? data.progress * 100 : data.progress;
+  }
+
+  const filename = data?.file || data?.name || "";
+  let sizeInfo = "";
+  if (Number.isFinite(data?.loaded) && Number.isFinite(data?.total) && data.total > 0) {
+    sizeInfo = ` (${formatMB(data.loaded)} / ${formatMB(data.total)})`;
+  }
+
+  if (data?.status === "progress") {
+    setStatus(
+      "loading",
+      window.t("modelLoadingTitle"),
+      filename ? `${window.t("modelFileLoading")}${filename}${sizeInfo}` : window.t("modelDownloading"),
+      pct ?? 15
+    );
+  } else if (data?.status === "done") {
+    setStatus("loading", window.t("loginModelStatusText"), window.t("modelComponentLoaded"), pct ?? 90);
+  } else if (data?.status === "ready") {
+    setStatus("ready", window.t("modelReadyTitle"), window.t("modelCanGenerate"), 100);
+  }
+}
+
+// Een enkele mislukte laadpoging (bijv. een kortstondige netwerkhapering bij
+// het downloaden van het model, of een WebGPU-adapter die de eerste keer nog
+// niet klaar is) betekent niet dat het model echt niet kan laden — een
+// volgende poging lukt in de praktijk vaak gewoon. Daarom probeert de app dit
+// eerst een paar keer automatisch opnieuw, in plaats van meteen een
+// foutmelding te tonen die de monteur zou laten denken dat er iets stuk is
+// (en die anders pas verdween door toevallig op "Genereer rapport" te
+// klikken, wat vanzelf een nieuwe poging triggerde).
+const MAX_LOAD_ATTEMPTS = 3;
+const LOAD_RETRY_DELAY_MS = 1200;
+
+// Alle pogingen lopen in één doorlopende lus binnen dezelfde promise, in
+// plaats van dat elke nieuwe poging via loadGenerator() zichzelf opnieuw
+// aanroept. Dat laatste zou namelijk "loadingPromise" terugverwijzen naar de
+// promise die nog bezig is zichzelf op te lossen (een circulaire wachtrij
+// die nooit vanzelf klaar is). Met deze lus blijft er precies één promise
+// bestaan die alle wachtende aanroepers (login-preload én de "Maak rapport"
+// knop) samen afwachten, en pas na de laatste mislukte poging wordt de
+// foutstatus getoond.
+async function attemptLoadGenerator() {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= MAX_LOAD_ATTEMPTS; attempt++) {
+    const isRetry = attempt > 1;
+
+    setStatus(
+      "loading",
+      isRetry ? window.t("modelRetryTitle") : window.t("modelLoadingTitle"),
+      isRetry ? window.t("modelRetryDetail") : window.t("modelLoadingDetail"),
+      3
+    );
+
+    try {
+      let pipe = null;
+
+      if ("gpu" in navigator) {
+        try {
+          pipe = await pipeline(
+            "text-generation",
+            MODEL_ID,
+            {
+              device: "webgpu",
+              dtype: "q4f16",
+              progress_callback: progressCallback
+            }
+          );
+          usingWebGPU = true;
+        } catch (gpuError) {
+          console.warn("WebGPU laden mislukt, CPU/WASM fallback:", gpuError);
+          usingWebGPU = false;
+        }
+      }
+
+      if (!pipe) {
+        usingWebGPU = false;
+        setStatus(
+          "loading",
+          window.t("modelCompatTitle"),
+          window.t("modelCompatDetail"),
+          5
+        );
+        pipe = await pipeline(
+          "text-generation",
+          MODEL_ID,
+          {
+            dtype: "q4",
+            progress_callback: progressCallback
+          }
+        );
+      }
+
+      generator = pipe;
+      setStatus(
+        "ready",
+        window.t("modelReadyTitle"),
+        usingWebGPU
+          ? window.t("modelReadyGpu")
+          : window.t("modelReadyCpu"),
+        100
+      );
+      return generator;
+    } catch (error) {
+      lastError = error;
+      console.warn(`Rapportmotor laden mislukt (poging ${attempt}/${MAX_LOAD_ATTEMPTS}):`, error);
+      if (attempt < MAX_LOAD_ATTEMPTS) {
+        await new Promise(resolve => setTimeout(resolve, LOAD_RETRY_DELAY_MS));
+      }
+    }
+  }
+
+  setStatus(
+    "error",
+    window.t("modelErrorTitle"),
+    window.t("modelErrorDetail"),
+    0
+  );
+  throw lastError;
+}
+
+async function loadGenerator() {
+  if (generator) return generator;
+  if (loadingPromise) return loadingPromise;
+
+  loadingPromise = attemptLoadGenerator().catch(error => {
+    loadingPromise = null;
+    throw error;
+  });
+  return loadingPromise;
+}
+
+function cleanLine(line) {
+  return line
+    .replace(/^[\s>*#-]+/, "")
+    .replace(/\*\*/g, "")
+    .trim();
+}
+
+function extractSection(text, startNames, endNames) {
+  const normalized = text.replace(/\r/g, "");
+  const startPattern = startNames.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  const endPattern = endNames.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+
+  const re = new RegExp(
+    `(?:^|\\n)\\s*(?:#{1,4}\\s*)?(?:\\*\\*)?(?:${startPattern})(?:\\*\\*)?\\s*:?\\s*\\n([\\s\\S]*?)(?=\\n\\s*(?:#{1,4}\\s*)?(?:\\*\\*)?(?:${endPattern})(?:\\*\\*)?\\s*:?|$)`,
+    "i"
+  );
+  const match = normalized.match(re);
+  if (!match) return [];
+
+  return match[1]
+    .split("\n")
+    .map(cleanLine)
+    .filter(Boolean)
+    .filter(x => !/^(geen|n\/a)$/i.test(x));
+}
+
+function parseReport(text) {
+  const raw = String(text || "").trim();
+
+  let title = "";
+  const titleMatch = raw.match(/(?:^|\n)\s*(?:\*\*)?(?:TITEL|TITLE)(?:\*\*)?\s*:\s*(.+)/i);
+  if (titleMatch) title = cleanLine(titleMatch[1]).replace(/[.]+$/, "");
+
+  const work = extractSection(
+    raw,
+    ["WERKZAAMHEDEN", "UITGEVOERDE WERKZAAMHEDEN", "WORK PERFORMED", "WORK"],
+    ["BEVINDINGEN", "VERVOLGSTAPPEN", "VERVOLG", "FINDINGS", "NEXT STEPS", "NEXT"]
+  );
+
+  const findings = extractSection(
+    raw,
+    ["BEVINDINGEN", "FINDINGS"],
+    ["VERVOLGSTAPPEN", "VERVOLG", "NEXT STEPS", "NEXT"]
+  );
+
+  let next = extractSection(
+    raw,
+    ["VERVOLGSTAPPEN", "VERVOLG", "NEXT STEPS", "NEXT"],
+    ["EINDE_RAPPORT", "END_REPORT"]
+  );
+
+  // If the final section parser misses because there is no following heading:
+  if (!next.length) {
+    const m = raw.match(/(?:^|\n)\s*(?:#{1,4}\s*)?(?:\*\*)?(?:VERVOLGSTAPPEN|VERVOLG|NEXT STEPS|NEXT)(?:\*\*)?\s*:?\s*\n([\s\S]*)$/i);
+    if (m) {
+      next = m[1].split("\n").map(cleanLine).filter(Boolean);
+    }
+  }
+
+  if (!work.length && !findings.length && !next.length) {
+    throw new Error(window.t("parseFailedMsg"));
+  }
+
+  return {
+    title: title || window.t("pdfDefaultTitle"),
+    work,
+    findings,
+    next_steps: next
+  };
+}
+
+window.prepareBrowserAI = loadGenerator;
+
+window.generateServiceReportAI = async function(input) {
+  const pipe = await loadGenerator();
+
+  setStatus(
+    "loading",
+    window.t("generatingTitle"),
+    usingWebGPU
+      ? window.t("generatingDetailGpu")
+      : window.t("generatingDetailCpu"),
+    100
+  );
+
+  const lang = window.getAppLanguage();
+  const activeSystemPrompt = lang === "en" ? systemPromptEn : systemPrompt;
+  const userInstruction = lang === "en"
+    ? "Now create a NEW service report using only this job description. " +
+      "Ignore any earlier example as factual information about this job.\n\n"
+    : "Maak nu een NIEUW servicerapport van alleen deze werkomschrijving. " +
+      "Negeer ieder eerder voorbeeld als feitelijke informatie over deze klus.\n\n";
+
+  const messages = [
+    { role: "system", content: activeSystemPrompt },
+    {
+      role: "user",
+      content: userInstruction + input
+    }
+  ];
+
+  // Kortere notities hebben doorgaans een korter rapport nodig: minder
+  // tokens vragen betekent minder rekentijd en dus een sneller resultaat.
+  // Zonder GPU-versnelling duurt elk token merkbaar langer, dus wordt het
+  // budget daar extra beperkt om de generatietijd binnen de perken te houden.
+  const approxWords = String(input || "").trim().split(/\s+/).filter(Boolean).length;
+  const baseTokens = Math.min(420, Math.max(180, approxWords * 6));
+  const maxNewTokens = usingWebGPU ? baseTokens : Math.min(baseTokens, 220);
+
+  // Harde grens aan de generatietijd: als dit verstrijkt, wordt de generatie
+  // via de bibliotheek zelf onderbroken (stoppingCriteria), in plaats van te
+  // hopen dat een externe timer tussendoor kan vuren. Dit voorkomt dat een
+  // trage browser/CPU minutenlang blijft doorrekenen zonder resultaat.
+  generationCancelled = false;
+  generationCancelledByUser = false;
+  stoppingCriteria.reset();
+
+  const watchdogMs = usingWebGPU ? 100000 : 70000;
+  const watchdog = setTimeout(() => {
+    generationCancelled = true;
+    stoppingCriteria.interrupt();
+  }, watchdogMs);
+
+  try {
+    const output = await pipe(messages, {
+      max_new_tokens: maxNewTokens,
+      do_sample: false,
+      repetition_penalty: 1.05,
+      stopping_criteria: stoppingCriteria
+    });
+
+    clearTimeout(watchdog);
+
+    if (generationCancelled) {
+      const message = generationCancelledByUser
+        ? window.t("generationCancelledMsg")
+        : window.t("generationTimeoutMsg").replace("{s}", Math.round(watchdogMs / 1000)) +
+          (usingWebGPU
+            ? window.t("generationTimeoutGpuHint")
+            : window.t("generationTimeoutCpuHint"));
+      throw new Error(message);
+    }
+
+    let text = "";
+    const generated = output?.[0]?.generated_text;
+
+    if (Array.isArray(generated)) {
+      text = generated.at(-1)?.content || "";
+    } else if (typeof generated === "string") {
+      text = generated;
+    }
+
+    const parsed = parseReport(text);
+    setStatus("ready", window.t("modelReadyTitle"), window.t("generatedReady"), 100);
+    return parsed;
+  } catch (error) {
+    clearTimeout(watchdog);
+    setStatus("error", window.t("generationFailedTitle"), error?.message || window.t("generationFailedGeneric"), 100);
+    throw error;
+  }
+};
+
+// Start het laden van het lokale taalmodel meteen zodra de pagina opent, nog
+// vóór het inloggen. Zo draait de (eenmalige) download al op de achtergrond
+// terwijl de monteur inlogt en zijn notities inspreekt, in plaats van pas te
+// beginnen nadat op "Genereer rapport" is geklikt.
+setTimeout(() => loadGenerator().catch(() => {}), 50);
+</script>
+
+</body>
+</html>
